@@ -1,7 +1,7 @@
 # TODO List
 Struktur Folder
 ```
-api #backend
+api #backend (golang)
 ├── cmd
 │   └── server
 ├── internal #internal
@@ -14,7 +14,7 @@ api #backend
 │   └── utils #utils
 └── go.mod #go.mod
 
-web #frontend
+web #frontend (vuejs)
 ├── src #source
 │   ├── components #components
 │   ├── pages #pages
