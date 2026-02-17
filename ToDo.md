@@ -1,4 +1,39 @@
 # TODO List
+Struktur Folder
+```
+api #backend
+├── cmd
+│   └── server
+├── internal #internal
+│   ├── handlers #handlers
+│   ├── models #models
+│   ├── database #database
+│   ├── middleware #middleware
+│   └── config #config
+├── pkg #package
+│   └── utils #utils
+└── go.mod #go.mod
+
+web #frontend
+├── src #source
+│   ├── components #components
+│   ├── pages #pages
+│   ├── assets #assets
+│   └── index.html #index.html
+└── package.json #package.json
+
+doc #documentasi
+├── api #api
+├── web #web
+└── README.md #README.md
+
+deploy #deploy
+├── api #api
+├── web #web
+└── README.md #README.md
+
+```
+
 ## Phase 1: Infrastructure & Planning (Fondasi)
 Ini adalah tahap "Design Document" sebelum coding.
 - Pilih Domain Name
