@@ -7,6 +7,8 @@ Image berbasis **Alpine Linux**. Build dari **root proyek**.
 - Podman (atau Docker) terpasang
 - Proyek API dan Web sudah siap (minimal `api/cmd/server/main.go` ada, `web` sudah bisa `npm run build`)
 
+**Catatan:** `.dockerignore` di root dipakai agar `api/.env` dan `node_modules` tidak ikut ke context/image.
+
 ## Build image
 
 Dari **root** (`c:\laragon\www\personal`):
@@ -24,8 +26,8 @@ podman build -f deploy/web/Dockerfile -t personal-web .
 ### Standalone (tanpa compose)
 
 ```powershell
-# API — port 8080
-podman run -d --name personal-api -p 8080:8080 personal-api
+# API — port 8080 (nama "api" dipakai agar container web bisa proxy ke backend)
+podman run -d --name api -p 8080:8080 personal-api
 
 # Web — port 80
 podman run -d --name personal-web -p 80:80 personal-web
@@ -34,14 +36,16 @@ podman run -d --name personal-web -p 80:80 personal-web
 Jika API butuh koneksi MariaDB (env):
 
 ```powershell
-podman run -d --name personal-api -p 8080:8080 -e DB_DSN="user:pass@tcp(host:3306)/dbname" personal-api
+podman run -d --name api -p 8080:8080 -e DB_DSN="user:pass@tcp(host:3306)/dbname" personal-api
 ```
 
-Atau gunakan file env:
+Atau gunakan file env (jalan di host, bukan di dalam image):
 
 ```powershell
-podman run -d --name personal-api -p 8080:8080 --env-file api/.env personal-api
+podman run -d --name api -p 8080:8080 --env-file api/.env personal-api
 ```
+
+**CORS:** Jika frontend di domain/origin lain memanggil API, set env `ALLOW_ORIGIN` (mis. `https://yoursite.com`).
 
 ### MariaDB (jika pakai container)
 
@@ -59,21 +63,21 @@ Lalu jalankan API dengan `DB_DSN` yang mengarah ke IP/host MariaDB (mis. `host.d
 ### Stop & hapus
 
 ```powershell
-podman stop personal-api personal-web
-podman rm personal-api personal-web
+podman stop api personal-web
+podman rm api personal-web
 ```
 
-## Opsi: Pod / network bersama
+## Opsi: Network bersama (proxy /api ke backend)
 
-Agar frontend bisa proxy ke API lewat nama host:
+Image web memakai proxy `/api/` → `http://api:8080/`. Buat network dan jalankan container API dengan nama **api**:
 
 ```powershell
 podman network create personal-net
-podman run -d --name personal-api --network personal-net -p 8080:8080 personal-api
+podman run -d --name api --network personal-net -p 8080:8080 personal-api
 podman run -d --name personal-web --network personal-net -p 80:80 personal-web
 ```
 
-Di Nginx, konfigurasi `proxy_pass http://personal-api:8080` bisa dipakai dengan menambah file konfigurasi custom (volume mount) atau image turunan yang menimpa `default.conf`.
+Akses http://localhost; request ke `/api/status` akan di-proxy ke backend.
 
 ## Referensi
 

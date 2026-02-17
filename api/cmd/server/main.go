@@ -36,7 +36,7 @@ func main() {
 
 	addr := ":" + strconv.Itoa(cfg.Port)
 
-	handler := middleware.SecurityHeaders(mux)
+	handler := middleware.CORS(middleware.SecurityHeaders(mux))
 	log.Printf("listening on %s", addr)
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
