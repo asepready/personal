@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://yoursite.com/</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://yoursite.com/about</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://yoursite.com/skills</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://yoursite.com/projects</loc><changefreq>monthly</changefreq></url>
+  <url><loc>https://yoursite.com/blog</loc><changefreq>weekly</changefreq></url>
+  <url><loc>https://yoursite.com/contact</loc><changefreq>yearly</changefreq></url>
+  <url><loc>https://yoursite.com/status</loc><changefreq>daily</changefreq></url>
+</urlset>
