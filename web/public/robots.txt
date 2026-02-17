@@ -1,0 +1,5 @@
+# Phase 6: SEO — robots.txt untuk recruiter
+User-agent: *
+Allow: /
+
+Sitemap: /sitemap.xml
