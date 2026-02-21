@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -12,33 +11,38 @@ import (
 type StatusResponse struct {
 	Status   string `json:"status"`
 	UptimeS  int64  `json:"uptime_seconds"`
-	Database string `json:"database"` // "ok", "disabled", "error"
+	Database string `json:"database"`
 }
 
 // Status returns server uptime and database status.
 func Status(startTime int64, db *database.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !AllowMethod(w, r, http.MethodGet) {
 			return
 		}
-		uptime := int64(0)
-		if startTime > 0 {
-			uptime = time.Now().Unix() - startTime
-		}
-		dbStatus := "disabled"
-		if db != nil {
-			if err := db.Ping(); err != nil {
-				dbStatus = "error"
-			} else {
-				dbStatus = "ok"
-			}
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(StatusResponse{
-			Status:   "ok",
+		uptime := computeUptime(startTime)
+		dbStatus := resolveDBStatus(db)
+		RespondJSON(w, http.StatusOK, StatusResponse{
+			Status:   StatusOK,
 			UptimeS:  uptime,
 			Database: dbStatus,
 		})
 	}
+}
+
+func computeUptime(startTime int64) int64 {
+	if startTime <= 0 {
+		return 0
+	}
+	return time.Now().Unix() - startTime
+}
+
+func resolveDBStatus(db *database.DB) string {
+	if db == nil {
+		return DBStatusDisabled
+	}
+	if err := db.Ping(); err != nil {
+		return DBStatusError
+	}
+	return DBStatusOK
 }

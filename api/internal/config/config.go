@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // Config holds application configuration.
@@ -27,7 +28,7 @@ func Load(startTime int64) *Config {
 			port = v
 		}
 	}
-	dsn := os.Getenv("DB_DSN")
+	dsn := strings.TrimSpace(os.Getenv("DB_DSN"))
 	if dsn == "" {
 		dsn = buildDSN(
 			os.Getenv("DB_USER"),
@@ -50,9 +51,13 @@ func Load(startTime int64) *Config {
 // buildDSN membangun DSN dari komponen. Kosong jika user/database tidak di-set.
 // Password di-encode agar karakter khusus ($, @, #, dll.) aman di connection string.
 func buildDSN(user, password, host, port, database string) string {
+	user = strings.TrimSpace(user)
+	database = strings.TrimSpace(database)
 	if user == "" || database == "" {
 		return ""
 	}
+	host = strings.TrimSpace(host)
+	port = strings.TrimSpace(port)
 	if host == "" {
 		host = "localhost"
 	}
