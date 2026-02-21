@@ -2,6 +2,8 @@
 
 Backend API memakai **MySQL/MariaDB**. Koneksi bersifat **opsional**: jika `DB_DSN` kosong atau gagal, server tetap berjalan; endpoint yang membutuhkan database (mis. `/api/skills`) mengembalikan `503 Service Unavailable`.
 
+**Belum punya database/user?** → Lihat [DATABASE-SETUP.md](DATABASE-SETUP.md) untuk panduan membuat database dan user.
+
 ---
 
 ## 1. Koneksi & konfigurasi

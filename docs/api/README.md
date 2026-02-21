@@ -6,6 +6,7 @@ Backend: **Golang** (net/http), **MariaDB/MySQL** (opsional).
 
 | Dokumen | Isi |
 |---------|-----|
+| [DATABASE-SETUP.md](DATABASE-SETUP.md) | **Membuat database dan user** MySQL/MariaDB (CREATE DATABASE, CREATE USER, GRANT). |
 | [DATABASE.md](DATABASE.md) | Schema, tabel, migrasi, DSN, kode terkait, test koneksi. |
 
 ## Endpoint
