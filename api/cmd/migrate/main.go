@@ -18,9 +18,10 @@ func main() {
 	flag.Parse()
 
 	_ = godotenv.Load()
+	_ = godotenv.Load("configs/.env")
 	cfg := config.Load(time.Now().Unix())
 	if cfg.DBDSN == "" {
-		log.Fatal("DB_DSN tidak di-set. Isi di .env")
+		log.Fatal("DB_DSN atau (DB_USER + DB_NAME) tidak di-set. Isi di api/configs/.env")
 	}
 
 	db, err := database.Open(cfg.DBDSN)
