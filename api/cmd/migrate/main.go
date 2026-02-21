@@ -1,11 +1,11 @@
-// Program migrasi database. Jalankan: go run ./cmd/migrate [--down]
+// Package main runs database migrations (up or down).
+// Usage: go run ./cmd/migrate [--down]
 package main
 
 import (
 	"context"
 	"flag"
 	"log"
-	"os"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -34,14 +34,13 @@ func main() {
 
 	if *down {
 		if err := database.MigrateDownSQL(ctx, db.DB); err != nil {
-			log.Fatalf("Migrate down gagal: %v", err)
+			log.Fatalf("migrate down: %v", err)
 		}
-		log.Print("Migrate down berhasil.")
-		os.Exit(0)
+		log.Print("migrate down: ok")
+		return
 	}
-
 	if err := database.MigrateUpSQL(ctx, db.DB); err != nil {
-		log.Fatalf("Migrate up gagal: %v", err)
+		log.Fatalf("migrate up: %v", err)
 	}
-	log.Print("Migrate up berhasil.")
+	log.Print("migrate up: ok")
 }

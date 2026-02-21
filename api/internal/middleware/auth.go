@@ -8,13 +8,13 @@ import (
 	"github.com/personal/api/internal/config"
 )
 
-// claims untuk parsing JWT (harus sama dengan handlers/auth.go)
+// claims is the JWT payload (must match handlers.auth claims).
 type claims struct {
 	Username string `json:"sub"`
 	jwt.RegisteredClaims
 }
 
-// RequireAuth memvalidasi Bearer token dan memanggil next hanya jika valid.
+// RequireAuth validates the Bearer token and calls next only if valid.
 func RequireAuth(cfg *config.Config, next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if cfg.JWTSecret == "" {

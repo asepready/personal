@@ -1,3 +1,4 @@
+// Package database provides MySQL/MariaDB connection and migrations.
 package database
 
 import (
@@ -8,14 +9,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// DB wraps *sql.DB for MariaDB/MySQL.
+// DB wraps *sql.DB for MySQL/MariaDB.
 type DB struct {
 	*sql.DB
 }
 
-// Open connects to MariaDB/MySQL.
-// DSN format: "user:password@tcp(host:3306)/dbname?parseTime=true"
-// Jika password berisi karakter khusus (@ : / ?), gunakan URL encoding.
+// Open connects to MySQL/MariaDB. If dsn is empty, returns (nil, nil).
+// DSN format: user:password@tcp(host:3306)/dbname?parseTime=true
 func Open(dsn string) (*DB, error) {
 	if dsn == "" {
 		return nil, nil
@@ -37,7 +37,7 @@ func Open(dsn string) (*DB, error) {
 	return &DB{db}, nil
 }
 
-// Ping returns nil if DB is connected (or DB is nil).
+// Ping returns nil if the database is reachable, or if DB is nil.
 func (db *DB) Ping() error {
 	if db == nil || db.DB == nil {
 		return nil

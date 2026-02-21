@@ -8,7 +8,13 @@ import (
 	"github.com/personal/api/internal/models"
 )
 
-// SkillsList returns GET /api/skills — daftar skills dari database.
+func writeJSONError(w http.ResponseWriter, code int, errMsg string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_ = json.NewEncoder(w).Encode(map[string]string{"error": errMsg})
+}
+
+// SkillsList returns a handler for GET /api/skills (list skills from DB).
 func SkillsList(db *database.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -16,7 +22,7 @@ func SkillsList(db *database.DB) http.HandlerFunc {
 			return
 		}
 		if db == nil || db.DB == nil {
-			http.Error(w, `{"error":"database not configured"}`, http.StatusServiceUnavailable)
+			writeJSONError(w, http.StatusServiceUnavailable, "database not configured")
 			return
 		}
 		rows, err := db.Query(`
@@ -26,7 +32,7 @@ func SkillsList(db *database.DB) http.HandlerFunc {
 			ORDER BY c.sort_order, s.name
 		`)
 		if err != nil {
-			http.Error(w, `{"error":"query failed"}`, http.StatusInternalServerError)
+			writeJSONError(w, http.StatusInternalServerError, "query failed")
 			return
 		}
 		defer rows.Close()
@@ -44,7 +50,6 @@ func SkillsList(db *database.DB) http.HandlerFunc {
 		if list == nil {
 			list = []models.Skill{}
 		}
-
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{"skills": list})
 	}

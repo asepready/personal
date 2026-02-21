@@ -8,14 +8,14 @@ import (
 	"github.com/personal/api/internal/database"
 )
 
-// StatusResponse is the JSON body for /status (Phase 5: Uptime Status Page).
+// StatusResponse is the response body for GET /status.
 type StatusResponse struct {
-	Status   string  `json:"status"`
-	UptimeS  int64   `json:"uptime_seconds"`
-	Database string  `json:"database"` // "ok", "disabled", "error"
+	Status   string `json:"status"`
+	UptimeS  int64  `json:"uptime_seconds"`
+	Database string `json:"database"` // "ok", "disabled", "error"
 }
 
-// Status returns uptime and optional DB status.
+// Status returns server uptime and database status.
 func Status(startTime int64, db *database.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {

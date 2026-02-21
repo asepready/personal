@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Run migrations. Usage: ./scripts/migrate.sh [--down]
+# Run migrations up (default) or down. Usage: ./scripts/migrate.sh [--down]
 set -e
 cd "$(dirname "$0")/.."
 if [ "$1" = "--down" ]; then

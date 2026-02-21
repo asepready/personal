@@ -13,6 +13,8 @@ import (
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
+// Migrations are embedded *.up.sql and *.down.sql in migrations/.
+
 const migrationsDir = "migrations"
 
 // schemaMigrationsTable dipakai untuk melacak migrasi yang sudah dijalankan.

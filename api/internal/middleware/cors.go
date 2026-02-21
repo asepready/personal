@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// CORS adds Access-Control-Allow-* headers when ALLOW_ORIGIN is set (untuk frontend beda origin).
+// CORS adds Access-Control-Allow-* headers when ALLOW_ORIGIN is set.
 func CORS(next http.Handler) http.Handler {
 	allowOrigin := strings.TrimSpace(os.Getenv("ALLOW_ORIGIN"))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

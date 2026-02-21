@@ -1,47 +1,5 @@
 # TODO List
 
-Struktur Folder
-
-```
-api #backend (golang)
-├── cmd
-│   └── server
-├── internal #internal
-│   ├── handlers #handlers
-│   ├── models #models
-│   │   ├── user.go          # Struct untuk table users
-│   │   ├── project.go       # Struct untuk table projects
-│   │   ├── skill.go         # Struct untuk table skills
-│   │   ├── post.go          # Struct untuk table posts
-│   │   ├── certification.go # Struct untuk table certifications
-│   │   └── uptime.go        # Struct untuk table uptime_logs
-│   ├── database #database
-│   ├── middleware #middleware
-│   └── config #config
-├── pkg #package
-│   └── utils #utils
-└── go.mod #go.mod
-
-web #frontend (vuejs)
-├── src #source
-│   ├── components #components
-│   ├── pages #pages
-│   ├── assets #assets
-│   └── index.html #index.html
-└── package.json #package.json
-
-doc #documentasi
-├── api #api
-├── web #web
-└── README.md #README.md
-
-deploy #deploy
-├── api #api
-├── web #web
-└── README.md #README.md
-
-```
-
 ## Phase 1: Infrastructure & Planning (Fondasi)
 
 Ini adalah tahap "Design Document" sebelum coding.

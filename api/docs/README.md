@@ -1,7 +1,7 @@
 # Docs
 
-Dokumentasi tambahan untuk project API.
+Additional documentation for the API project.
 
-- **API**: Endpoint utama ada di `cmd/server`; route didaftar di `main.go`.
-- **Migrasi**: Schema di `internal/database/table.sql`; file migrasi di `internal/database/migrations/`.
-- **Referensi layout**: [golang-standards/project-layout](https://github.com/golang-standards/project-layout).
+- **API**: Entry point is `cmd/server`; routes are registered in `main.go`.
+- **Database**: Schema reference in `internal/database/table.sql`; migrations in `internal/database/migrations/`.
+- **Layout**: [Standard Go Project Layout](https://github.com/golang-standards/project-layout).

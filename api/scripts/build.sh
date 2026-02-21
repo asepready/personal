@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Build server binary.
+# Build server and migrate binaries. Run from repo root or scripts/.
 set -e
 cd "$(dirname "$0")/.."
 go build -o bin/server ./cmd/server

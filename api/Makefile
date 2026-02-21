@@ -9,7 +9,7 @@ build:
 	@echo "OK: bin/server, bin/migrate"
 
 test:
-	go test ./internal/... ./test/... -v -count=1
+	go test ./internal/... ./testing/... -v -count=1
 
 run:
 	go run ./cmd/server

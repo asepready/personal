@@ -9,24 +9,24 @@ import (
 	"github.com/personal/api/internal/config"
 )
 
-// LoginRequest body untuk POST /api/login
+// LoginRequest is the request body for POST /login.
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-// LoginResponse body setelah login sukses
+// LoginResponse is the response body on successful login.
 type LoginResponse struct {
 	Token string `json:"token"`
 }
 
-// claims untuk JWT
+// claims holds JWT claims (subject = username).
 type claims struct {
 	Username string `json:"sub"`
 	jwt.RegisteredClaims
 }
 
-// Login memvalidasi username/password dan mengembalikan JWT.
+// Login validates credentials and returns a JWT.
 func Login(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {

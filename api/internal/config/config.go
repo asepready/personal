@@ -1,3 +1,4 @@
+// Package config loads application configuration from environment variables.
 package config
 
 import (
@@ -5,17 +6,17 @@ import (
 	"strconv"
 )
 
-// Config holds application configuration from environment.
+// Config holds application configuration.
 type Config struct {
-	Port          int
-	DBDSN         string
-	StartTime     int64  // unix seconds, set at startup for uptime
-	AdminUsername string // untuk login admin
+	Port          int    // HTTP server port (default 8080)
+	DBDSN         string // MySQL DSN: user:password@tcp(host:port)/dbname?parseTime=true
+	StartTime     int64  // Unix time at startup (for uptime)
+	AdminUsername string
 	AdminPassword string
-	JWTSecret     string // secret untuk tanda-tangan JWT
+	JWTSecret     string // Min 32 chars for HS256
 }
 
-// Load reads config from environment.
+// Load reads configuration from the environment.
 func Load(startTime int64) *Config {
 	port := 8080
 	if p := os.Getenv("PORT"); p != "" {

@@ -5,12 +5,12 @@ import (
 	"net/http"
 )
 
-// AdminResponse contoh response halaman admin
+// AdminResponse is the response body for GET /admin.
 type AdminResponse struct {
 	Message string `json:"message"`
 }
 
-// Admin mengembalikan data admin (hanya jika token valid).
+// Admin returns the admin payload (called after RequireAuth).
 func Admin(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)

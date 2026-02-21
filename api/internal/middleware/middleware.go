@@ -1,3 +1,4 @@
+// Package middleware provides HTTP middleware: CORS, auth, and security headers.
 package middleware
 
 import (

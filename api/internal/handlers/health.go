@@ -1,3 +1,4 @@
+// Package handlers implements HTTP handlers for the API.
 package handlers
 
 import (
@@ -5,7 +6,7 @@ import (
 	"net/http"
 )
 
-// HealthResponse is the JSON body for /health.
+// HealthResponse is the response body for GET /health.
 type HealthResponse struct {
 	Status string `json:"status"`
 }

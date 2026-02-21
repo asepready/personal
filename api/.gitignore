@@ -1,0 +1,12 @@
+# Binaries
+bin/
+
+# Environment (secrets)
+.env
+.env.local
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

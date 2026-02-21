@@ -1,3 +1,4 @@
+// Package main runs the API HTTP server.
 package main
 
 import (
@@ -14,7 +15,7 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load() // load .env dari working directory (opsional jika tidak ada)
+	_ = godotenv.Load()
 	startTime := time.Now().Unix()
 	cfg := config.Load(startTime)
 
