@@ -4,8 +4,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/joho/godotenv"
 	"github.com/personal/api/internal/database"
 )
+
+func init() {
+	// Load api/configs/.env saat test dijalankan dari folder api/ (supaya DB_DSN dipakai TestDatabaseConnection)
+	_ = godotenv.Load("configs/.env")
+}
 
 // TestDatabaseConnection memastikan koneksi ke database berhasil (ping + query sederhana).
 // Dikeluarkan jika DB_DSN tidak di-set (CI tanpa MySQL).
