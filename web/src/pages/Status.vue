@@ -7,7 +7,8 @@ const status = ref(null)
 const error = ref(null)
 
 onMounted(async () => {
-  const url = apiBase ? `${apiBase.replace(/\/$/, '')}/api/status` : '/api/status'
+  // Same-origin: /api/status (proxy/rewrite ke /status). Cross-origin: apiBase + /status
+  const url = apiBase ? `${apiBase.replace(/\/$/, '')}/status` : '/api/status'
   try {
     const r = await fetch(url)
     if (!r.ok) throw new Error(r.statusText)

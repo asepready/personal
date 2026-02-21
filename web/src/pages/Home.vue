@@ -6,7 +6,18 @@ const valueProp = 'Automating Infrastructure & Ensuring Security'
 
 <template>
   <div class="space-y-16">
-    <section class="space-y-6">
+    <section class="flex flex-col sm:flex-row gap-8 sm:gap-12 items-start">
+      <!-- Phase 2: Foto profil — ganti src dengan foto Anda (WebP/AVIF disarankan) -->
+      <div class="shrink-0">
+        <img
+          src="/avatar.svg"
+          alt="Profile"
+          width="160"
+          height="160"
+          class="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl object-cover border-2 border-neutral-200 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800"
+        />
+      </div>
+      <div class="space-y-6 min-w-0">
       <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-neutral-900 dark:text-white">
         {{ role }}
       </h1>
@@ -27,6 +38,7 @@ const valueProp = 'Automating Infrastructure & Ensuring Security'
         >
           Contact
         </RouterLink>
+      </div>
       </div>
     </section>
     <section>

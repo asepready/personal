@@ -1,0 +1,8 @@
+# Jangan kirim ke Docker context (keamanan & ukuran)
+.git
+.env
+api/.env
+*.exe
+**/node_modules
+**/dist
+doc

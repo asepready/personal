@@ -1,18 +1,19 @@
 @import "tailwindcss";
 
+/* Tailwind v4: dark mode pakai class .dark di ancestor (mis. <html>) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Rest of the file... */
+/* Hindari flash: warna default netral, tema dari Tailwind + class .dark */
+:root {
+  color-scheme: light dark;
+}

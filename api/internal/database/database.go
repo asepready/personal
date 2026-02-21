@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"time"
 
@@ -12,7 +13,9 @@ type DB struct {
 	*sql.DB
 }
 
-// Open connects to MariaDB/MySQL. DSN format: "user:pass@tcp(host:3306)/dbname?parseTime=true"
+// Open connects to MariaDB/MySQL.
+// DSN format: "user:password@tcp(host:3306)/dbname?parseTime=true"
+// Jika password berisi karakter khusus (@ : / ?), gunakan URL encoding.
 func Open(dsn string) (*DB, error) {
 	if dsn == "" {
 		return nil, nil
@@ -24,7 +27,10 @@ func Open(dsn string) (*DB, error) {
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(5 * time.Minute)
-	if err := db.Ping(); err != nil {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := db.PingContext(ctx); err != nil {
 		_ = db.Close()
 		return nil, err
 	}

@@ -8,7 +8,10 @@ import Blog from '../pages/Blog.vue'
 import Contact from '../pages/Contact.vue'
 import Status from '../pages/Status.vue'
 import BlogPost from '../pages/BlogPost.vue'
+import Login from '../pages/Login.vue'
+import Admin from '../pages/Admin.vue'
 import NotFound from '../pages/NotFound.vue'
+import { useAuth } from '../composables/useAuth'
 
 const routes = [
   {
@@ -23,6 +26,8 @@ const routes = [
       { path: 'blog/:slug', name: 'BlogPost', component: BlogPost },
       { path: 'contact', name: 'Contact', component: Contact },
       { path: 'status', name: 'Status', component: Status },
+      { path: 'login', name: 'Login', component: Login },
+      { path: 'admin', name: 'Admin', component: Admin, meta: { requiresAuth: true } },
     ],
   },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
@@ -31,6 +36,16 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach((to) => {
+  const auth = useAuth()
+  if (to.meta.requiresAuth && !auth.isLoggedIn()) {
+    return { name: 'Login', query: { redirect: to.fullPath } }
+  }
+  if (to.name === 'Login' && auth.isLoggedIn()) {
+    return { name: 'Admin' }
+  }
 })
 
 export default router

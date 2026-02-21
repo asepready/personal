@@ -23,18 +23,23 @@ func main() {
 		var err error
 		db, err = database.Open(cfg.DBDSN)
 		if err != nil {
-			log.Fatalf("database: %v", err)
+			log.Printf("database: koneksi gagal (jalan tanpa DB): %v", err)
+			db = nil
+		} else {
+			log.Print("database: terhubung")
+			defer db.Close()
 		}
-		defer db.Close()
 	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", handlers.Health)
 	mux.HandleFunc("/status", handlers.Status(cfg.StartTime, db))
+	mux.HandleFunc("/login", handlers.Login(cfg))
+	mux.Handle("/admin", middleware.RequireAuth(cfg, handlers.Admin))
 
 	addr := ":" + strconv.Itoa(cfg.Port)
 
-	handler := middleware.SecurityHeaders(mux)
+	handler := middleware.CORS(middleware.SecurityHeaders(mux))
 	log.Printf("listening on %s", addr)
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
