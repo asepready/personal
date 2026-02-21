@@ -8,8 +8,9 @@ Workflow: **`.github/workflows/ci-cd.yml`**
 
 | Job | Isi |
 |-----|-----|
-| **API** | Checkout → Set up Go (cache) → `go build ./...` → `go test ./tests/...` |
-| **Web** | Checkout → Set up Node (npm cache) → `npm ci` → `npm run build` → upload artifact `web-dist` |
+| **API (build + test)** | Checkout → Set up Go (cache) → `go build ./...` → **`go test ./tests/...`** (semua paket & fungsi di `api/tests`) |
+| **Web (build)** | Checkout → Set up Node (npm cache) → `npm ci` → `npm run build` → upload artifact `web-dist` |
+| **Enable auto-merge** | Hanya pada **pull request**: setelah API dan Web lulus, PR di-set **auto-merge** (squash) sehingga GitHub akan merge otomatis ketika semua required check selesai. |
 
 Deploy **tidak** dijalankan pada pull request, hanya pada **push** ke `main`/`master`.
 
@@ -21,10 +22,14 @@ Deploy **tidak** dijalankan pada pull request, hanya pada **push** ke `main`/`ma
 
 ### Mengaktifkan GitHub Pages
 
-1. Repo → **Settings** → **Pages**.
-2. Di **Source** pilih **GitHub Actions** (bukan branch).
-3. Setelah workflow jalan sekali (push ke `main`), URL Pages biasanya:  
-   `https://<username>.github.io/<repo>/`
+Workflow memakai `enablement: true` pada `configure-pages` sehingga Pages bisa aktif otomatis. Jika job **Deploy (GitHub Pages)** tetap gagal dengan error *"Get Pages site failed"* atau *"Not Found"*:
+
+1. Buka repo → **Settings** → **Pages**.
+2. Di **Build and deployment** > **Source** pilih **GitHub Actions** (bukan "Deploy from a branch").
+3. Simpan. Lalu push ulang atau **Re-run jobs** di tab Actions.
+
+Setelah Pages aktif dan workflow sukses, URL biasanya:  
+`https://<username>.github.io/<repo>/`
 
 ### Base URL untuk Vite (opsional)
 
@@ -39,7 +44,15 @@ export default defineConfig({
 
 Kalau repo Anda adalah **user.github.io** (situs utama), base bisa tetap `/`.
 
+## Auto-merge pull request
+
+Jika job **API (build + test)** dan **Web (build)** lulus di suatu PR, job **Enable auto-merge** akan menjalankan `gh pr merge --auto --squash` sehingga PR tersebut di-set merge otomatis (squash) setelah semua required check selesai.
+
+- Pastikan repo mengizinkan **Squash and merge** (Settings → General → Pull Requests).
+- Jika pakai branch protection, tambahkan status check **API (build + test)** dan **Web (build)** agar merge hanya saat CI lulus.
+
 ## Ringkasan
 
-- **CI:** build + test API, build Web; jalan di setiap push dan PR.
+- **CI:** build + test API (`api/tests`), build Web; jalan di setiap push dan PR.
+- **Auto-merge:** pada PR, setelah API & Web lulus, PR di-set auto-merge (squash).
 - **CD:** deploy hasil build Web ke GitHub Pages; hanya saat push ke `main`/`master` dan setelah Pages di-set ke **GitHub Actions**.
