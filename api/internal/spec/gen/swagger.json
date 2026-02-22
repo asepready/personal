@@ -1,0 +1,12 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Backend API: health, status, login (JWT), public (skills, projects, posts), admin CRUD (CMS).",
+        "title": "Personal / Portfolio API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8081",
+    "basePath": "/api",
+    "paths": {}
+}

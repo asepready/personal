@@ -1,0 +1,10 @@
+basePath: /api
+host: localhost:8081
+info:
+  contact: {}
+  description: 'Backend API: health, status, login (JWT), public (skills, projects,
+    posts), admin CRUD (CMS).'
+  title: Personal / Portfolio API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
