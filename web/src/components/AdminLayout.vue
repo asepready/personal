@@ -1,20 +1,40 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { useApiBase } from '../composables/useApi'
 
 const route = useRoute()
 const auth = useAuth()
+const { adminResourcesUrl } = useApiBase()
+
+const navItems = ref([
+  { path: '/admin', label: 'Overview', desc: 'Ringkasan data' },
+])
 
 function logout() {
   auth.logout()
   window.location.href = '/login'
 }
 
-const navItems = [
-  { path: '/admin', label: 'Overview', desc: 'Ringkasan data' },
-  { path: '/admin/categories', label: 'Kategori Skill', desc: 'Kelola kategori' },
-  { path: '/admin/skills', label: 'Skills', desc: 'Kelola skills' },
-]
+function getAuthHeaders() {
+  const t = auth.getToken()
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+
+onMounted(async () => {
+  try {
+    const r = await fetch(adminResourcesUrl(), { headers: getAuthHeaders() })
+    if (r.ok) {
+      const data = await r.json()
+      const resources = data.resources || []
+      navItems.value = [
+        { path: '/admin', label: 'Overview', desc: 'Ringkasan data' },
+        ...resources.map((res) => ({ path: `/admin/${res.id}`, label: res.label, desc: `Kelola ${res.label.toLowerCase()}` })),
+      ]
+    }
+  } catch (_) {}
+})
 </script>
 
 <template>
@@ -22,7 +42,7 @@ const navItems = [
     <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-200 dark:border-neutral-800 pb-4 mb-6">
       <div>
         <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Dashboard Admin</h1>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">Kelola isi database (kategori & skills)</p>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">CMS — kelola konten berdasarkan model database</p>
       </div>
       <button
         type="button"

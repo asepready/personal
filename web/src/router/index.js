@@ -11,8 +11,7 @@ import BlogPost from '../pages/BlogPost.vue'
 import Login from '../pages/Login.vue'
 import AdminLayout from '../components/AdminLayout.vue'
 import AdminOverview from '../pages/admin/AdminOverview.vue'
-import AdminCategories from '../pages/admin/AdminCategories.vue'
-import AdminSkills from '../pages/admin/AdminSkills.vue'
+import AdminResource from '../pages/admin/AdminResource.vue'
 import NotFound from '../pages/NotFound.vue'
 import { useAuth } from '../composables/useAuth'
 
@@ -36,8 +35,13 @@ const routes = [
         meta: { requiresAuth: true },
         children: [
           { path: '', name: 'Admin', component: AdminOverview },
-          { path: 'categories', name: 'AdminCategories', component: AdminCategories },
-          { path: 'skills', name: 'AdminSkills', component: AdminSkills },
+          { path: 'categories', redirect: { name: 'AdminSkillCategories' } },
+          { path: 'skill-categories', name: 'AdminSkillCategories', component: AdminResource },
+          { path: 'skills', name: 'AdminSkills', component: AdminResource },
+          { path: 'tools', name: 'AdminTools', component: AdminResource },
+          { path: 'tags', name: 'AdminTags', component: AdminResource },
+          { path: 'projects', name: 'AdminProjects', component: AdminResource },
+          { path: 'posts', name: 'AdminPosts', component: AdminResource },
         ],
       },
     ],

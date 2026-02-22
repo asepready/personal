@@ -46,10 +46,19 @@ func main() {
 	mux.HandleFunc("/api/posts", handlers.PostsList(db))
 	mux.HandleFunc("/api/posts/", handlers.PostBySlug(db))
 	mux.HandleFunc("/login", handlers.Login(cfg))
-	// Admin dashboard API (CRUD) — paket handlers/admin
+	// Admin dashboard API (CRUD) — paket handlers/admin, CMS-style dinamis
+	mux.Handle("/admin/resources", middleware.RequireAuth(cfg, http.HandlerFunc(admin.Resources)))
 	mux.Handle("/admin/skill-categories", middleware.RequireAuth(cfg, admin.Categories(db)))
 	mux.Handle("/admin/skills", middleware.RequireAuth(cfg, admin.Skills(db)))
-	mux.Handle("/admin", middleware.RequireAuth(cfg, admin.Overview))
+	mux.Handle("/admin/tools/", middleware.RequireAuth(cfg, admin.Tools(db)))
+	mux.Handle("/admin/tools", middleware.RequireAuth(cfg, admin.Tools(db)))
+	mux.Handle("/admin/tags/", middleware.RequireAuth(cfg, admin.Tags(db)))
+	mux.Handle("/admin/tags", middleware.RequireAuth(cfg, admin.Tags(db)))
+	mux.Handle("/admin/projects/", middleware.RequireAuth(cfg, admin.Projects(db)))
+	mux.Handle("/admin/projects", middleware.RequireAuth(cfg, admin.Projects(db)))
+	mux.Handle("/admin/posts/", middleware.RequireAuth(cfg, admin.Posts(db)))
+	mux.Handle("/admin/posts", middleware.RequireAuth(cfg, admin.Posts(db)))
+	mux.Handle("/admin", middleware.RequireAuth(cfg, http.HandlerFunc(admin.Overview)))
 
 	addr := ":" + strconv.Itoa(cfg.Port)
 

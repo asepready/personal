@@ -1,39 +1,66 @@
-services:
-  db:
-    image: mariadb:latest
-    environment:
-      MARIADB_ROOT_PASSWORD: rootpassword
-      MARIADB_DATABASE: portfolio
-      MARIADB_USER: user
-      MARIADB_PASSWORD: password
-    ports:
-      - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
+# Podman/Docker Compose — deploy microservice (api, web, db)
+# Jalankan: podman-compose up -d   atau: podman compose up -d
+# Build: podman-compose up -d --build
 
+services:
   api:
     build:
       context: ./api
-      dockerfile: ../deployment/api/Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
+      dockerfile: Containerfile
+    image: personal-api:latest
+    container_name: personal-api
+    restart: unless-stopped
     environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: portfolio
+      PORT: "8081"
+      # Ganti dengan nilai aman; atau gunakan file .env (compose env_file)
+      DB_DSN: "personal:${DB_PASSWORD:-changeme}@tcp(db:3306)/personal?parseTime=true"
+      ADMIN_USERNAME: "${ADMIN_USERNAME:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-admin}"
+      JWT_SECRET: "${JWT_SECRET:-minimal_32_character_secret_for_jwt_signing}"
+      # Origin frontend (browser); di belakang proxy pakai URL publik atau kosongkan
+      ALLOW_ORIGIN: "${ALLOW_ORIGIN:-}"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - personal
 
   web:
     build:
       context: ./web
-      dockerfile: ../deployment/web/Dockerfile
+      dockerfile: Containerfile
+    image: personal-web:latest
+    container_name: personal-web
+    restart: unless-stopped
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - api
+    networks:
+      - personal
+
+  db:
+    image: mariadb:11
+    container_name: personal-db
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-rootsecret}"
+      MARIADB_DATABASE: personal
+      MARIADB_USER: personal
+      MARIADB_PASSWORD: "${DB_PASSWORD:-changeme}"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - personal
 
 volumes:
-  db_data:
+  dbdata:
+
+networks:
+  personal:
+    driver: bridge

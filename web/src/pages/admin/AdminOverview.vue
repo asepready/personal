@@ -7,13 +7,22 @@ import { useApiBase } from '../../composables/useApi'
 
 const router = useRouter()
 const auth = useAuth()
-const { adminUrl, adminCategoriesUrl, adminSkillsUrl } = useApiBase()
+const { adminUrl, adminResourcesUrl, adminResourceUrl } = useApiBase()
+
+const LIST_KEYS = {
+  'skill-categories': 'categories',
+  'skills': 'skills',
+  'tools': 'tools',
+  'tags': 'tags',
+  'projects': 'projects',
+  'posts': 'posts',
+}
 
 const message = ref('')
 const loading = ref(true)
 const error = ref('')
-const stats = ref({ categories: 0, skills: 0 })
-const statsLoading = ref(true)
+const resources = ref([])
+const counts = ref({})
 
 function getAuthHeaders() {
   const t = auth.getToken()
@@ -27,11 +36,7 @@ onMounted(async () => {
     return
   }
   try {
-    const [rAdmin, rCat, rSkills] = await Promise.all([
-      fetch(adminUrl(), { headers: getAuthHeaders() }),
-      fetch(adminCategoriesUrl(), { headers: getAuthHeaders() }),
-      fetch(adminSkillsUrl(), { headers: getAuthHeaders() }),
-    ])
+    const rAdmin = await fetch(adminUrl(), { headers: getAuthHeaders() })
     if (rAdmin.status === 401) {
       auth.logout()
       router.replace('/login')
@@ -43,19 +48,32 @@ onMounted(async () => {
     } else {
       error.value = 'Gagal memuat data admin.'
     }
-    if (rCat.ok) {
-      const d = await rCat.json()
-      stats.value.categories = (d.categories || []).length
-    }
-    if (rSkills.ok) {
-      const d = await rSkills.json()
-      stats.value.skills = (d.skills || []).length
+
+    const rRes = await fetch(adminResourcesUrl(), { headers: getAuthHeaders() })
+    if (rRes.ok) {
+      const data = await rRes.json()
+      resources.value = data.resources || []
+      await Promise.all(
+        resources.value.map(async (res) => {
+          try {
+            const r = await fetch(adminResourceUrl(res.id), { headers: getAuthHeaders() })
+            if (r.ok) {
+              const d = await r.json()
+              const key = LIST_KEYS[res.id]
+              counts.value[res.id] = (d[key] || []).length
+            } else {
+              counts.value[res.id] = 0
+            }
+          } catch (_) {
+            counts.value[res.id] = 0
+          }
+        })
+      )
     }
   } catch (_) {
     error.value = 'Koneksi gagal.'
   } finally {
     loading.value = false
-    statsLoading.value = false
   }
 })
 </script>
@@ -69,28 +87,20 @@ onMounted(async () => {
       <div class="p-6 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 space-y-4">
         <p class="text-neutral-700 dark:text-neutral-300">{{ message }}</p>
         <p class="text-sm text-neutral-500 dark:text-neutral-400">
-          Gunakan menu samping untuk mengelola <strong>Kategori Skill</strong> dan <strong>Skills</strong>.
+          Kelola konten secara dinamis berdasarkan model database (CMS/LMS). Pilih resource di bawah atau dari menu samping.
         </p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <RouterLink
-          to="/admin/categories"
+          v-for="res in resources"
+          :key="res.id"
+          :to="`/admin/${res.id}`"
           class="block p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors"
         >
-          <h3 class="font-semibold text-neutral-900 dark:text-white">Kategori Skill</h3>
-          <p v-if="statsLoading" class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Memuat…</p>
-          <p v-else class="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mt-1">{{ stats.categories }}</p>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Tambah / edit / hapus kategori</p>
-        </RouterLink>
-        <RouterLink
-          to="/admin/skills"
-          class="block p-5 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 hover:border-neutral-300 dark:hover:border-neutral-600 transition-colors"
-        >
-          <h3 class="font-semibold text-neutral-900 dark:text-white">Skills</h3>
-          <p v-if="statsLoading" class="text-sm text-neutral-500 dark:text-neutral-400 mt-1">Memuat…</p>
-          <p v-else class="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mt-1">{{ stats.skills }}</p>
-          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Tambah / edit / hapus skill per kategori</p>
+          <h3 class="font-semibold text-neutral-900 dark:text-white">{{ res.label }}</h3>
+          <p class="text-2xl font-bold text-neutral-700 dark:text-neutral-200 mt-1">{{ counts[res.id] ?? '—' }}</p>
+          <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">Tambah / edit / hapus</p>
         </RouterLink>
       </div>
     </template>
