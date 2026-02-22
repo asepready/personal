@@ -1,0 +1,147 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Personal / Portfolio API",
+    "description": "Backend API: health, status, login (JWT), public (skills, projects, posts), admin CRUD (CMS).",
+    "version": "1.0"
+  },
+  "servers": [
+    { "url": "http://localhost:8081", "description": "Local" },
+    { "url": "/", "description": "Relative (proxy)" }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "tags": ["Public"],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string", "example": "ok" } } } } } }
+      }
+    },
+    "/api/status": {
+      "get": {
+        "summary": "Uptime + status database",
+        "tags": ["Public"],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "status": { "type": "string" }, "uptime_seconds": { "type": "integer" }, "database": { "type": "string", "enum": ["ok", "disabled", "error"] } } } } } }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "summary": "Login admin → JWT",
+        "tags": ["Public"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["username", "password"], "properties": { "username": { "type": "string" }, "password": { "type": "string" } } } } },
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" } } } } }, "400": { "description": "Invalid body" }, "401": { "description": "Invalid credentials" }, "503": { "description": "Login not configured" } }
+      }
+    },
+    "/api/skills": {
+      "get": {
+        "summary": "Daftar skills",
+        "tags": ["Public"],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "skills": { "type": "array", "items": { "type": "object" } } } } } }, "503": { "description": "Database not configured" } }
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "summary": "Daftar proyek",
+        "tags": ["Public"],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "projects": { "type": "array" } } } } }, "503": { "description": "Database not configured" } }
+      }
+    },
+    "/api/projects/{slug}": {
+      "get": {
+        "summary": "Detail proyek by slug",
+        "tags": ["Public"],
+        "parameters": [{ "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } }
+      }
+    },
+    "/api/posts": {
+      "get": {
+        "summary": "Daftar post (published)",
+        "tags": ["Public"],
+        "responses": { "200": { "description": "OK", "content": { "application/json": { "schema": { "type": "object", "properties": { "posts": { "type": "array" } } } } }, "503": { "description": "Database not configured" } }
+      }
+    },
+    "/api/posts/{slug}": {
+      "get": {
+        "summary": "Detail post by slug",
+        "tags": ["Public"],
+        "parameters": [{ "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } }
+      }
+    },
+    "/api/admin": {
+      "get": {
+        "summary": "Overview admin",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/admin/resources": {
+      "get": {
+        "summary": "Schema resource CMS (list + form fields)",
+        "tags": ["Admin"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/api/admin/skill-categories": {
+      "get": { "summary": "List kategori skill", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create kategori", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Created" } } },
+      "put": { "summary": "Update kategori", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "delete": { "summary": "Delete kategori", "tags": ["Admin"], "parameters": [{ "name": "id", "in": "query", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/admin/skills": {
+      "get": { "summary": "List skills", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create skill", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Created" } } },
+      "put": { "summary": "Update skill", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "delete": { "summary": "Delete skill", "tags": ["Admin"], "parameters": [{ "name": "id", "in": "query", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/admin/tools": {
+      "get": { "summary": "List tools", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create tool", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Created" } } },
+      "put": { "summary": "Update tool", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "delete": { "summary": "Delete tool", "tags": ["Admin"], "parameters": [{ "name": "id", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/admin/tools/{id}": {
+      "get": { "summary": "Get tool by ID", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } }
+    },
+    "/api/admin/tags": {
+      "get": { "summary": "List tags", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create tag", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Created" } } },
+      "put": { "summary": "Update tag", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "delete": { "summary": "Delete tag", "tags": ["Admin"], "parameters": [{ "name": "id", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/admin/tags/{id}": {
+      "get": { "summary": "Get tag by ID", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } }
+    },
+    "/api/admin/projects": {
+      "get": { "summary": "List projects", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create project", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Created" } } },
+      "put": { "summary": "Update project", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "delete": { "summary": "Delete project", "tags": ["Admin"], "parameters": [{ "name": "id", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/admin/projects/{id}": {
+      "get": { "summary": "Get project by ID", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } }
+    },
+    "/api/admin/posts": {
+      "get": { "summary": "List posts", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "post": { "summary": "Create post", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "201": { "description": "Created" } } },
+      "put": { "summary": "Update post", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "responses": { "200": { "description": "OK" } } },
+      "delete": { "summary": "Delete post", "tags": ["Admin"], "parameters": [{ "name": "id", "in": "query", "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" } } }
+    },
+    "/api/admin/posts/{id}": {
+      "get": { "summary": "Get post by ID", "tags": ["Admin"], "security": [{ "bearerAuth": [] }], "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }], "responses": { "200": { "description": "OK" }, "404": { "description": "Not found" } } }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Token dari POST /api/login"
+      }
+    }
+  }
+}
