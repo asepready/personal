@@ -11,6 +11,7 @@ import (
 	"github.com/personal/api/internal/config"
 	"github.com/personal/api/internal/database"
 	"github.com/personal/api/internal/handlers"
+	"github.com/personal/api/internal/handlers/admin"
 	"github.com/personal/api/internal/middleware"
 )
 
@@ -40,10 +41,10 @@ func main() {
 	mux.HandleFunc("/status", handlers.Status(cfg.StartTime, db))
 	mux.HandleFunc("/api/skills", handlers.SkillsList(db))
 	mux.HandleFunc("/login", handlers.Login(cfg))
-	// Admin dashboard API (CRUD) — lebih spesifik dulu
-	mux.Handle("/admin/skill-categories", middleware.RequireAuth(cfg, handlers.AdminSkillCategories(db)))
-	mux.Handle("/admin/skills", middleware.RequireAuth(cfg, handlers.AdminSkills(db)))
-	mux.Handle("/admin", middleware.RequireAuth(cfg, handlers.Admin))
+	// Admin dashboard API (CRUD) — paket handlers/admin
+	mux.Handle("/admin/skill-categories", middleware.RequireAuth(cfg, admin.Categories(db)))
+	mux.Handle("/admin/skills", middleware.RequireAuth(cfg, admin.Skills(db)))
+	mux.Handle("/admin", middleware.RequireAuth(cfg, admin.Overview))
 
 	addr := ":" + strconv.Itoa(cfg.Port)
 

@@ -22,11 +22,11 @@ func SkillsList(db *database.DB) http.HandlerFunc {
 		if !AllowMethod(w, r, http.MethodGet) {
 			return
 		}
-		if !dbAvailable(db) {
+		if !DBAvailable(db) {
 			RespondError(w, http.StatusServiceUnavailable, "database not configured")
 			return
 		}
-		list, err := fetchSkills(db)
+		list, err := FetchSkills(db)
 		if err != nil {
 			RespondError(w, http.StatusInternalServerError, "query failed")
 			return
@@ -35,11 +35,13 @@ func SkillsList(db *database.DB) http.HandlerFunc {
 	}
 }
 
-func dbAvailable(db *database.DB) bool {
+// DBAvailable returns true if db is configured and usable (untuk dipakai paket admin).
+func DBAvailable(db *database.DB) bool {
 	return db != nil && db.DB != nil
 }
 
-func fetchSkills(db *database.DB) ([]models.Skill, error) {
+// FetchSkills returns all skills with category name (untuk dipakai paket admin).
+func FetchSkills(db *database.DB) ([]models.Skill, error) {
 	rows, err := db.Query(querySkills)
 	if err != nil {
 		return nil, err
