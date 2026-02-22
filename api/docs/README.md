@@ -13,7 +13,7 @@ Dokumentasi proyek backend API (Go).
 ## Layout singkat
 
 - **Entry point:** `cmd/server/main.go` — daftar route & middleware.
-- **Handler:** `internal/handlers/` — health, status, auth, admin, skills.
+- **Handler:** `internal/handlers/` — health, status, auth, skills; `internal/handlers/admin/` — overview, categories, skills (CRUD).
 - **Middleware:** `internal/middleware/` — CORS, security headers, JWT auth.
 - **Database:** `internal/database/` — koneksi, migrasi, schema referensi `table.sql`.
 - **Unit test:** `tests/` — black-box test untuk handlers & middleware.
