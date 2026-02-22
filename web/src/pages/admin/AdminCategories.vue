@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useAuth } from '../../composables/useAuth'
 import { useApiBase } from '../../composables/useApi'
 
@@ -9,17 +9,36 @@ const { adminCategoriesUrl } = useApiBase()
 const categories = ref([])
 const loading = ref(true)
 const error = ref('')
+const successMessage = ref('')
 const formOpen = ref(false)
-const editing = ref(null) // { id, name, slug, sort_order }
+const editing = ref(null)
 const saving = ref(false)
-const deleteConfirm = ref(null) // id to delete
+const deleteConfirm = ref(null) // { id, name } or null
 
 const formTitle = computed(() => (editing.value ? 'Edit kategori' : 'Tambah kategori'))
+const deleteConfirmName = computed(() => deleteConfirm.value?.name ?? '')
 
 function getAuthHeaders() {
   const t = auth.getToken()
   return t ? { Authorization: `Bearer ${t}` } : {}
 }
+
+function showSuccess(msg) {
+  successMessage.value = msg
+  error.value = ''
+}
+
+function showError(msg) {
+  error.value = msg
+  successMessage.value = ''
+}
+
+watch(successMessage, (v) => {
+  if (v) {
+    const t = setTimeout(() => { successMessage.value = '' }, 4000)
+    return () => clearTimeout(t)
+  }
+})
 
 async function load() {
   loading.value = true
@@ -35,7 +54,7 @@ async function load() {
     const data = await r.json()
     categories.value = data.categories || []
   } catch (e) {
-    error.value = e.message || 'Koneksi gagal'
+    showError(e.message || 'Koneksi gagal')
   } finally {
     loading.value = false
   }
@@ -58,7 +77,7 @@ function closeForm() {
 
 async function submitForm(payload) {
   saving.value = true
-  error.value = ''
+  showError('')
   try {
     const url = adminCategoriesUrl()
     const method = payload.id ? 'PUT' : 'POST'
@@ -76,17 +95,19 @@ async function submitForm(payload) {
     if (!r.ok) throw new Error(data.error || 'Gagal menyimpan')
     closeForm()
     await load()
+    showSuccess(payload.id ? 'Kategori berhasil diperbarui.' : 'Kategori berhasil ditambah.')
   } catch (e) {
-    error.value = e.message || 'Gagal menyimpan'
+    showError(e.message || 'Gagal menyimpan')
   } finally {
     saving.value = false
   }
 }
 
-async function doDelete(id) {
-  if (!confirm('Hapus kategori ini? Skill di dalamnya ikut terhapus (CASCADE).')) return
+async function doDelete() {
+  if (!deleteConfirm.value) return
+  const id = deleteConfirm.value.id
   saving.value = true
-  error.value = ''
+  showError('')
   try {
     const r = await fetch(`${adminCategoriesUrl()}?id=${id}`, {
       method: 'DELETE',
@@ -103,8 +124,9 @@ async function doDelete(id) {
     }
     deleteConfirm.value = null
     await load()
+    showSuccess('Kategori berhasil dihapus.')
   } catch (e) {
-    error.value = e.message || 'Gagal menghapus'
+    showError(e.message || 'Gagal menghapus')
   } finally {
     saving.value = false
   }
@@ -120,14 +142,17 @@ onMounted(load)
       <button
         type="button"
         @click="openCreate"
-        class="px-3 py-1.5 rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium hover:opacity-90"
+        class="px-4 py-2 rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-sm font-medium hover:opacity-90 transition-opacity"
       >
-        Tambah kategori
+        + Tambah kategori
       </button>
     </div>
-    <p v-if="error" class="text-red-600 dark:text-red-400 text-sm">{{ error }}</p>
+    <p v-if="successMessage" class="text-sm text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-2 rounded-lg">
+      {{ successMessage }}
+    </p>
+    <p v-if="error" class="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{{ error }}</p>
     <div v-if="loading" class="py-8 text-neutral-500 dark:text-neutral-400">Memuat…</div>
-    <div v-else class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800">
+    <div v-else class="overflow-x-auto rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/30">
       <table class="w-full text-sm">
         <thead class="bg-neutral-100 dark:bg-neutral-800/50">
           <tr>
@@ -135,22 +160,29 @@ onMounted(load)
             <th class="text-left py-3 px-4 font-medium text-neutral-700 dark:text-neutral-300">Nama</th>
             <th class="text-left py-3 px-4 font-medium text-neutral-700 dark:text-neutral-300">Slug</th>
             <th class="text-left py-3 px-4 font-medium text-neutral-700 dark:text-neutral-300">Urutan</th>
-            <th class="w-24 py-3 px-4"></th>
+            <th class="w-28 py-3 px-4 text-right">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800">
-          <tr v-for="cat in categories" :key="cat.id" class="text-neutral-600 dark:text-neutral-400">
+          <tr
+            v-for="(cat, i) in categories"
+            :key="cat.id"
+            class="text-neutral-600 dark:text-neutral-400"
+            :class="i % 2 === 1 ? 'bg-neutral-50/50 dark:bg-neutral-800/20' : ''"
+          >
             <td class="py-3 px-4">{{ cat.id }}</td>
-            <td class="py-3 px-4">{{ cat.name }}</td>
+            <td class="py-3 px-4 font-medium text-neutral-800 dark:text-neutral-200">{{ cat.name }}</td>
             <td class="py-3 px-4 font-mono text-xs">{{ cat.slug }}</td>
             <td class="py-3 px-4">{{ cat.sort_order }}</td>
-            <td class="py-3 px-4 flex gap-2">
-              <button type="button" @click="openEdit(cat)" class="text-blue-600 dark:text-blue-400 hover:underline">Edit</button>
-              <button type="button" @click="deleteConfirm = cat.id" class="text-red-600 dark:text-red-400 hover:underline">Hapus</button>
+            <td class="py-3 px-4 text-right">
+              <button type="button" @click="openEdit(cat)" class="text-blue-600 dark:text-blue-400 hover:underline mr-3">Edit</button>
+              <button type="button" @click="deleteConfirm = { id: cat.id, name: cat.name }" class="text-red-600 dark:text-red-400 hover:underline">Hapus</button>
             </td>
           </tr>
           <tr v-if="!categories.length">
-            <td colspan="5" class="py-6 px-4 text-center text-neutral-500 dark:text-neutral-400">Belum ada kategori. Klik &quot;Tambah kategori&quot;.</td>
+            <td colspan="5" class="py-10 px-4 text-center text-neutral-500 dark:text-neutral-400">
+              Belum ada kategori. Klik &quot;Tambah kategori&quot; untuk menambah.
+            </td>
           </tr>
         </tbody>
       </table>
@@ -181,7 +213,7 @@ onMounted(load)
               name="name"
               :value="editing?.name"
               required
-              class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
+              class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:outline-none"
               placeholder="Contoh: Automation"
             />
           </div>
@@ -192,7 +224,7 @@ onMounted(load)
               name="slug"
               :value="editing?.slug"
               required
-              class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white"
+              class="w-full px-3 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-500 focus:outline-none"
               placeholder="automation"
             />
           </div>
@@ -210,7 +242,7 @@ onMounted(load)
             <button type="submit" :disabled="saving" class="px-4 py-2 rounded-lg bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 font-medium disabled:opacity-50">
               {{ saving ? 'Menyimpan…' : 'Simpan' }}
             </button>
-            <button type="button" @click="closeForm" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600">Batal</button>
+            <button type="button" @click="closeForm" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800">Batal</button>
           </div>
         </form>
       </div>
@@ -219,12 +251,15 @@ onMounted(load)
     <!-- Delete confirm -->
     <div v-if="deleteConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" @click.self="deleteConfirm = null">
       <div class="bg-white dark:bg-neutral-900 rounded-xl shadow-xl max-w-sm w-full p-6 border border-neutral-200 dark:border-neutral-700">
-        <p class="text-neutral-700 dark:text-neutral-300 mb-4">Yakin hapus kategori ini? Semua skill di dalamnya ikut terhapus.</p>
+        <p class="text-neutral-700 dark:text-neutral-300 mb-2">
+          Hapus kategori <strong>{{ deleteConfirmName }}</strong>?
+        </p>
+        <p class="text-sm text-amber-600 dark:text-amber-400 mb-4">Semua skill di kategori ini ikut terhapus (CASCADE).</p>
         <div class="flex gap-2">
-          <button type="button" @click="doDelete(deleteConfirm)" :disabled="saving" class="px-4 py-2 rounded-lg bg-red-600 text-white font-medium disabled:opacity-50">
+          <button type="button" @click="doDelete" :disabled="saving" class="px-4 py-2 rounded-lg bg-red-600 text-white font-medium disabled:opacity-50 hover:bg-red-700">
             Ya, hapus
           </button>
-          <button type="button" @click="deleteConfirm = null" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600">Batal</button>
+          <button type="button" @click="deleteConfirm = null" class="px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-800">Batal</button>
         </div>
       </div>
     </div>
