@@ -1,9 +1,9 @@
-# CI/CD: build, test (api/tests + web), deploy, auto-merge PR
+# CI/CD: build, test (api/tests + web), deploy, auto-merge PR, buat PR ke main jika push ke branch lain lolos test
 name: CI/CD
 
 on:
   push:
-    branches: [main, master]
+    # Semua branch: agar push ke branch selain main bisa jalankan test lalu buat PR
   pull_request:
     branches: [main, master]
 
@@ -87,6 +87,40 @@ jobs:
       - name: Enable auto-merge
         run: |
           gh pr merge "${{ github.event.pull_request.number }}" --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Push ke branch selain main/master & lolos test → buat PR ke main (jika belum ada)
+  create-pr:
+    name: Buat PR ke main
+    runs-on: ubuntu-latest
+    needs: [api, web]
+    if: github.event_name == 'push' && github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Cek PR yang sudah ada
+        id: pr
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          EXISTING=$(gh pr list --base main --head "$BRANCH" --state open --json number -q '.[0].number' 2>/dev/null || true)
+          if [ -n "$EXISTING" ] && [ "$EXISTING" != "null" ]; then
+            echo "pr_number=$EXISTING" >> $GITHUB_OUTPUT
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Buat Pull Request ke main
+        if: steps.pr.outputs.exists == 'false'
+        run: |
+          gh pr create --base main --head "${{ github.ref_name }}" \
+            --title "Merge ${{ github.ref_name }} → main (CI lulus)" \
+            --body "PR otomatis: branch **${{ github.ref_name }}** lolos build & test. Silakan review lalu merge (auto-merge sudah diaktifkan)."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
