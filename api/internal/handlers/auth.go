@@ -24,7 +24,7 @@ type claims struct {
 	jwt.RegisteredClaims
 }
 
-const jwtExpiry = 24 * time.Hour
+const jwtExpiry = 7 * 24 * time.Hour // 7 hari agar tidak perlu login berulang saat mengelola isi
 
 // Login validates credentials and returns a JWT.
 func Login(cfg *config.Config) http.HandlerFunc {

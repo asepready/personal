@@ -13,6 +13,7 @@ const username = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const sessionExpired = ref(route.query.reason === 'session')
 
 async function onSubmit(e) {
   e.preventDefault()
@@ -55,6 +56,9 @@ async function onSubmit(e) {
   <div class="min-h-[60vh] flex flex-col items-center justify-center">
     <div class="w-full max-w-sm rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 p-6 shadow-sm">
       <h1 class="text-xl font-bold text-neutral-900 dark:text-white mb-6">Login Admin</h1>
+      <p v-if="sessionExpired" class="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg mb-4">
+        Sesi habis. Silakan login lagi.
+      </p>
       <form @submit="onSubmit" class="space-y-4">
         <div>
           <label for="username" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Username</label>

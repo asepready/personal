@@ -45,6 +45,11 @@ watch(successMessage, (v) => {
 async function loadCategories() {
   try {
     const r = await fetch(adminCategoriesUrl(), { headers: getAuthHeaders() })
+    if (r.status === 401) {
+      auth.logout()
+      window.location.href = '/login?reason=session&redirect=/admin'
+      return
+    }
     if (r.ok) {
       const data = await r.json()
       categories.value = data.categories || []
