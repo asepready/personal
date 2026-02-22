@@ -1,16 +1,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useApiBase } from '../composables/useApi'
 
 // Phase 5: Uptime Status Page — ambil dari API /status
-const apiBase = import.meta.env.VITE_API_URL || ''
+const { statusUrl } = useApiBase()
 const status = ref(null)
 const error = ref(null)
 
 onMounted(async () => {
-  // Same-origin: /api/status (proxy/rewrite ke /status). Cross-origin: apiBase + /status
-  const url = apiBase ? `${apiBase.replace(/\/$/, '')}/status` : '/api/status'
   try {
-    const r = await fetch(url)
+    const r = await fetch(statusUrl())
     if (!r.ok) throw new Error(r.statusText)
     status.value = await r.json()
   } catch (e) {

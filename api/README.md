@@ -36,30 +36,32 @@ go run ./cmd/migrate
 | GET | `/api/skills` | — | Daftar skills (dari DB) |
 | GET | `/admin` | Bearer JWT | Area admin |
 
-Detail request/response: **[docs/API.md](docs/API.md)**.
+Detail request/response dan konfigurasi: **[docs/api/README.md](../docs/api/README.md)**.
 
 ## Konfigurasi
 
-Variabel penting di `.env`: `PORT`, `DB_DSN`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `JWT_SECRET`, `ALLOW_ORIGIN` (CORS).  
-Penjelasan lengkap: **[docs/CONFIG.md](docs/CONFIG.md)**.
+Variabel penting di `.env`: `PORT`, `DB_DSN` (atau `DB_USER`+`DB_NAME`), `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `JWT_SECRET`, `ALLOW_ORIGIN` (CORS).  
+Penjelasan lengkap: **[docs/api/README.md](../docs/api/README.md#konfigurasi-env)**.
 
 ## Perintah
+
+Semua perintah di bawah dijalankan dari **folder `api/`** (bukan dari `web/` atau root repo):
 
 | Perintah | Deskripsi |
 |----------|-----------|
 | `make run` | Jalankan server |
 | `make build` | Build `bin/server` dan `bin/migrate` |
-| `make test` | Unit test (`tests/`) |
+| `make test` | Unit test (`tests/`) — **jalankan dari folder api/** |
 | `make migrate` | Migrasi DB (up) |
 | `make migrate-down` | Rollback migrasi |
 
 ## Dokumentasi
 
-Semua dokumentasi API ada di folder **`docs/`**:
+Dokumentasi API ada di **`docs/api/`** dan **`docs/`**:
 
-- [docs/README.md](docs/README.md) — indeks
-- [docs/SETUP.md](docs/SETUP.md) — setup & quick start
-- [docs/API.md](docs/API.md) — endpoint
-- [docs/CONFIG.md](docs/CONFIG.md) — env
-- [docs/DATABASE.md](docs/DATABASE.md) — schema & migrasi
-- [docs/TESTS.md](docs/TESTS.md) — unit test
+- [docs/api/README.md](../docs/api/README.md) — endpoint, request/response, konfigurasi env
+- [docs/api/DATABASE.md](../docs/api/DATABASE.md) — schema & migrasi
+- [docs/api/DATABASE-SETUP.md](../docs/api/DATABASE-SETUP.md) — buat database & user MySQL
+- [docs/README.md](../docs/README.md) — indeks docs
+- [docs/RUN-API.md](../docs/RUN-API.md) — cara jalankan API
+- [docs/DEPLOY.md](../docs/DEPLOY.md) — CI/CD & deploy

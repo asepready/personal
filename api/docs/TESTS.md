@@ -30,7 +30,8 @@ make test
 | `tests/admin_test.go` | `handlers.Admin` — GET 200, method not allowed. |
 | `tests/skills_test.go` | `handlers.SkillsList` — no DB 503, method not allowed. |
 | `tests/middleware_auth_test.go` | `middleware.RequireAuth` — missing header, invalid prefix/token, valid token, not configured. |
+| `tests/database_test.go` | Koneksi DB: `Open`, `Ping`, `SELECT 1`. Skip jika `DB_DSN` tidak di-set (CI tanpa MySQL tetap lulus). `Open("")` harus mengembalikan `(nil, nil)`. |
 
-Tidak ada koneksi database nyata: handler yang butuh DB di-test dengan `db == nil` atau struct kosong.
+Handler yang butuh DB di-test dengan `db == nil` atau struct kosong, kecuali `database_test.go` yang (jika `DB_DSN` di-set) memakai koneksi nyata.
 
 Detail isi setiap file test: lihat **`tests/README.md`**.

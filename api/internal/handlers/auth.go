@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
@@ -20,46 +19,62 @@ type LoginResponse struct {
 	Token string `json:"token"`
 }
 
-// claims holds JWT claims (subject = username).
 type claims struct {
 	Username string `json:"sub"`
 	jwt.RegisteredClaims
 }
 
+const jwtExpiry = 7 * 24 * time.Hour // 7 hari agar tidak perlu login berulang saat mengelola isi
+
 // Login validates credentials and returns a JWT.
 func Login(cfg *config.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !AllowMethod(w, r, http.MethodPost) {
 			return
 		}
-		if cfg.JWTSecret == "" || cfg.AdminUsername == "" || cfg.AdminPassword == "" {
+		defer r.Body.Close()
+
+		if !isLoginConfigured(cfg) {
 			http.Error(w, "login not configured", http.StatusServiceUnavailable)
 			return
 		}
+
 		var req LoginRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		if err := DecodeJSON(r, &req); err != nil {
 			http.Error(w, "invalid body", http.StatusBadRequest)
 			return
 		}
-		if req.Username != cfg.AdminUsername || req.Password != cfg.AdminPassword {
+
+		if !credentialsMatch(req, cfg) {
 			http.Error(w, "invalid credentials", http.StatusUnauthorized)
 			return
 		}
-		c := claims{
-			Username: req.Username,
-			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-				IssuedAt:  jwt.NewNumericDate(time.Now()),
-			},
-		}
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-		tokenString, err := token.SignedString([]byte(cfg.JWTSecret))
+
+		tokenString, err := buildJWT(req.Username, cfg.JWTSecret)
 		if err != nil {
 			http.Error(w, "token error", http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(LoginResponse{Token: tokenString})
+		RespondJSON(w, http.StatusOK, LoginResponse{Token: tokenString})
 	}
+}
+
+func isLoginConfigured(cfg *config.Config) bool {
+	return cfg.JWTSecret != "" && cfg.AdminUsername != "" && cfg.AdminPassword != ""
+}
+
+func credentialsMatch(req LoginRequest, cfg *config.Config) bool {
+	return req.Username == cfg.AdminUsername && req.Password == cfg.AdminPassword
+}
+
+func buildJWT(username, secret string) (string, error) {
+	c := claims{
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(jwtExpiry)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
+	return token.SignedString([]byte(secret))
 }

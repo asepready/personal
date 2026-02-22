@@ -1,6 +1,6 @@
 # Binaries
 bin/
-
+vendor/
 # Environment (secrets)
 .env
 .env.local

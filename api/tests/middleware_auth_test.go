@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/personal/api/internal/config"
-	"github.com/personal/api/internal/handlers"
+	"github.com/personal/api/internal/handlers/admin"
 	"github.com/personal/api/internal/middleware"
 )
 
@@ -40,7 +40,7 @@ func mustSignToken(t *testing.T, secret string, username string) string {
 
 func TestRequireAuth_MissingHeader(t *testing.T) {
 	cfg := testAuthConfig()
-	h := middleware.RequireAuth(cfg, handlers.Admin)
+	h := middleware.RequireAuth(cfg, admin.Overview)
 	req := httptest.NewRequest(http.MethodGet, "/admin", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
@@ -51,7 +51,7 @@ func TestRequireAuth_MissingHeader(t *testing.T) {
 
 func TestRequireAuth_InvalidPrefix(t *testing.T) {
 	cfg := testAuthConfig()
-	h := middleware.RequireAuth(cfg, handlers.Admin)
+	h := middleware.RequireAuth(cfg, admin.Overview)
 	req := httptest.NewRequest(http.MethodGet, "/admin", nil)
 	req.Header.Set("Authorization", "Basic xxx")
 	rec := httptest.NewRecorder()
@@ -63,7 +63,7 @@ func TestRequireAuth_InvalidPrefix(t *testing.T) {
 
 func TestRequireAuth_InvalidToken(t *testing.T) {
 	cfg := testAuthConfig()
-	h := middleware.RequireAuth(cfg, handlers.Admin)
+	h := middleware.RequireAuth(cfg, admin.Overview)
 	req := httptest.NewRequest(http.MethodGet, "/admin", nil)
 	req.Header.Set("Authorization", "Bearer invalid.jwt.token")
 	rec := httptest.NewRecorder()
@@ -76,7 +76,7 @@ func TestRequireAuth_InvalidToken(t *testing.T) {
 func TestRequireAuth_ValidToken(t *testing.T) {
 	cfg := testAuthConfig()
 	token := mustSignToken(t, cfg.JWTSecret, "admin")
-	h := middleware.RequireAuth(cfg, handlers.Admin)
+	h := middleware.RequireAuth(cfg, admin.Overview)
 	req := httptest.NewRequest(http.MethodGet, "/admin", nil)
 	req.Header.Set("Authorization", "Bearer "+token)
 	rec := httptest.NewRecorder()
@@ -88,7 +88,7 @@ func TestRequireAuth_ValidToken(t *testing.T) {
 
 func TestRequireAuth_NotConfigured(t *testing.T) {
 	cfg := &config.Config{JWTSecret: ""}
-	h := middleware.RequireAuth(cfg, handlers.Admin)
+	h := middleware.RequireAuth(cfg, admin.Overview)
 	req := httptest.NewRequest(http.MethodGet, "/admin", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)

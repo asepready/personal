@@ -46,9 +46,13 @@ Dokumen ini memetakan lokasi file di repository berdasarkan **fungsi** (apa pera
 |--------|--------|
 | `api/internal/handlers/health.go` | Health check (liveness/readiness) |
 | `api/internal/handlers/status.go` | Status page (uptime, dll.) |
-| `api/internal/handlers/auth.go` | Login, register, token |
-| `api/internal/handlers/admin.go` | Endpoint admin (perlu auth) |
-| `api/internal/handlers/skills.go` | CRUD skills (public + admin) |
+| `api/internal/handlers/auth.go` | Login, token JWT |
+| `api/internal/handlers/skills.go` | GET /api/skills (list skills, public) |
+| `api/internal/handlers/projects.go` | GET /api/projects (list), GET /api/projects/:slug (detail + tools) |
+| `api/internal/handlers/posts.go` | GET /api/posts (list published), GET /api/posts/:slug (detail) |
+| `api/internal/handlers/admin/overview.go` | GET /admin (overview, perlu auth) |
+| `api/internal/handlers/admin/categories.go` | CRUD /admin/skill-categories |
+| `api/internal/handlers/admin/skills.go` | CRUD /admin/skills |
 
 ### Middleware
 | Lokasi | Fungsi |
@@ -65,8 +69,7 @@ Dokumen ini memetakan lokasi file di repository berdasarkan **fungsi** (apa pera
 ### Tes
 | Lokasi | Fungsi |
 |--------|--------|
-| `api/internal/handlers/*_test.go` | Unit test handler |
-| `api/internal/middleware/auth_test.go` | Unit test middleware auth |
+| `api/tests/*_test.go` | Unit test: health, auth, status, admin, skills, middleware, database |
 
 ### Script & build
 | Lokasi | Fungsi |
@@ -110,18 +113,22 @@ Dokumen ini memetakan lokasi file di repository berdasarkan **fungsi** (apa pera
 | `web/src/pages/Contact.vue` | Kontak |
 | `web/src/pages/Status.vue` | Status / uptime (Phase 5 ToDo) |
 | `web/src/pages/Login.vue` | Login |
-| `web/src/pages/Admin.vue` | Area admin (perlu auth) |
+| `web/src/pages/admin/AdminOverview.vue` | Dashboard admin (overview) |
+| `web/src/pages/admin/AdminCategories.vue` | CRUD kategori skill |
+| `web/src/pages/admin/AdminSkills.vue` | CRUD skills |
 | `web/src/pages/NotFound.vue` | 404 (Phase 6 ToDo: custom 404) |
 
 ### Komponen
 | Lokasi | Fungsi |
 |--------|--------|
 | `web/src/components/Layout.vue` | Layout (header, nav, dark mode) |
+| `web/src/components/AdminLayout.vue` | Layout dashboard admin (sidebar + router-view) |
 
 ### State & logic
 | Lokasi | Fungsi |
 |--------|--------|
 | `web/src/composables/useAuth.js` | State login, token, logout |
+| `web/src/composables/useApi.js` | Base URL API, helper skillsUrl, loginUrl, statusUrl, adminUrl, adminCategoriesUrl, adminSkillsUrl |
 
 ### Aset & publik
 | Lokasi | Fungsi |

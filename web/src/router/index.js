@@ -9,7 +9,10 @@ import Contact from '../pages/Contact.vue'
 import Status from '../pages/Status.vue'
 import BlogPost from '../pages/BlogPost.vue'
 import Login from '../pages/Login.vue'
-import Admin from '../pages/Admin.vue'
+import AdminLayout from '../components/AdminLayout.vue'
+import AdminOverview from '../pages/admin/AdminOverview.vue'
+import AdminCategories from '../pages/admin/AdminCategories.vue'
+import AdminSkills from '../pages/admin/AdminSkills.vue'
 import NotFound from '../pages/NotFound.vue'
 import { useAuth } from '../composables/useAuth'
 
@@ -27,7 +30,16 @@ const routes = [
       { path: 'contact', name: 'Contact', component: Contact },
       { path: 'status', name: 'Status', component: Status },
       { path: 'login', name: 'Login', component: Login },
-      { path: 'admin', name: 'Admin', component: Admin, meta: { requiresAuth: true } },
+      {
+        path: 'admin',
+        component: AdminLayout,
+        meta: { requiresAuth: true },
+        children: [
+          { path: '', name: 'Admin', component: AdminOverview },
+          { path: 'categories', name: 'AdminCategories', component: AdminCategories },
+          { path: 'skills', name: 'AdminSkills', component: AdminSkills },
+        ],
+      },
     ],
   },
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },

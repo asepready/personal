@@ -155,16 +155,33 @@ func (db *DB) runMigration(ctx context.Context, version, sqlBody string, isUp bo
 	return tx.Commit()
 }
 
+// splitStatements memecah isi SQL per statement (pemisah ;).
+// Baris komentar (--) di awal tiap blok dibuang, bukan seluruh blok.
+// Catatan: jangan gunakan ; di dalam string literal di file migrasi.
 func splitStatements(s string) []string {
-	// Pisahkan per statement; MySQL menganggap ; sebagai pemisah
 	var out []string
 	for _, part := range strings.Split(s, ";") {
-		part = strings.TrimSpace(part)
-		if part != "" && !strings.HasPrefix(strings.TrimLeft(part, " \t\n\r"), "--") {
-			out = append(out, part+";")
+		part = stripLeadingCommentLines(strings.TrimSpace(part))
+		if part == "" {
+			continue
 		}
+		out = append(out, part+";")
 	}
 	return out
+}
+
+// stripLeadingCommentLines menghapus baris kosong dan baris komentar (--) di awal s.
+func stripLeadingCommentLines(s string) string {
+	lines := strings.Split(s, "\n")
+	i := 0
+	for i < len(lines) {
+		line := strings.TrimSpace(lines[i])
+		if line != "" && !strings.HasPrefix(line, "--") {
+			break
+		}
+		i++
+	}
+	return strings.TrimSpace(strings.Join(lines[i:], "\n"))
 }
 
 // MigrateUpSQL sama seperti MigrateUp tapi pakai *sql.DB (untuk CLI).

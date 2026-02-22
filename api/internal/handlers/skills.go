@@ -1,56 +1,75 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/personal/api/internal/database"
 	"github.com/personal/api/internal/models"
 )
 
-func writeJSONError(w http.ResponseWriter, code int, errMsg string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(map[string]string{"error": errMsg})
-}
+const (
+	querySkills = `
+		SELECT s.id, s.category_id, s.name, s.level, s.icon_url, COALESCE(c.name, '') AS category_name
+		FROM skills s
+		LEFT JOIN skill_categories c ON c.id = s.category_id
+		ORDER BY c.sort_order, s.name
+	`
+)
 
-// SkillsList returns a handler for GET /api/skills (list skills from DB).
+// SkillsList returns a handler for GET /api/skills.
 func SkillsList(db *database.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		if !AllowMethod(w, r, http.MethodGet) {
 			return
 		}
-		if db == nil || db.DB == nil {
-			writeJSONError(w, http.StatusServiceUnavailable, "database not configured")
+		if !DBAvailable(db) {
+			RespondError(w, http.StatusServiceUnavailable, "database not configured")
 			return
 		}
-		rows, err := db.Query(`
-			SELECT s.id, s.category_id, s.name, s.level, s.icon_url, COALESCE(c.name, '') AS category_name
-			FROM skills s
-			LEFT JOIN skill_categories c ON c.id = s.category_id
-			ORDER BY c.sort_order, s.name
-		`)
+		list, err := FetchSkills(db)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, "query failed")
+			RespondError(w, http.StatusInternalServerError, "query failed")
 			return
 		}
-		defer rows.Close()
-
-		var list []models.Skill
-		for rows.Next() {
-			var s models.Skill
-			var catName string
-			if err := rows.Scan(&s.ID, &s.CategoryID, &s.Name, &s.Level, &s.IconURL, &catName); err != nil {
-				continue
-			}
-			s.Category = catName
-			list = append(list, s)
-		}
-		if list == nil {
-			list = []models.Skill{}
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]interface{}{"skills": list})
+		RespondJSON(w, http.StatusOK, map[string]interface{}{"skills": list})
 	}
+}
+
+// DBAvailable returns true if db is configured and usable (untuk dipakai paket admin).
+func DBAvailable(db *database.DB) bool {
+	return db != nil && db.DB != nil
+}
+
+// FetchSkills returns all skills with category name (untuk dipakai paket admin).
+func FetchSkills(db *database.DB) ([]models.Skill, error) {
+	rows, err := db.Query(querySkills)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanSkills(rows)
+}
+
+func scanSkills(rows interface {
+	Next() bool
+	Scan(dest ...interface{}) error
+	Err() error
+}) ([]models.Skill, error) {
+	var list []models.Skill
+	for rows.Next() {
+		var s models.Skill
+		var catName string
+		if err := rows.Scan(&s.ID, &s.CategoryID, &s.Name, &s.Level, &s.IconURL, &catName); err != nil {
+			return nil, err
+		}
+		s.Category = catName
+		list = append(list, s)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if list == nil {
+		list = []models.Skill{}
+	}
+	return list, nil
 }
