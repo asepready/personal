@@ -71,6 +71,8 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Enable auto-merge
         run: |
           gh pr merge "${{ github.event.pull_request.number }}" --auto --squash
@@ -92,11 +94,12 @@ jobs:
         with:
           name: web-dist
 
-      # enablement: true = coba aktifkan Pages otomatis jika belum. Jika gagal, aktifkan manual di Settings > Pages > Source: GitHub Actions.
+      # enablement: false — Pages harus diaktifkan sekali manual: Settings > Pages > Build and deployment > Source: GitHub Actions.
+      # Jika pakai enablement: true dan dapat "Resource not accessible by integration", aktifkan Pages manual dulu lalu re-run.
       - name: Setup Pages
         uses: actions/configure-pages@v4
         with:
-          enablement: true
+          enablement: false
 
       - name: Upload to Pages
         uses: actions/upload-pages-artifact@v3

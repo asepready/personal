@@ -95,8 +95,8 @@ personal/
 
 ## Build & deploy
 
-- **API:** `cd api && make build` → binary di `api/bin/server` (dan `bin/migrate`). Jalankan dengan `configs/.env` di lingkungan target.
-- **Web:** `cd web && npm run build` → output di `web/dist/`. Deploy isi `dist/` ke static hosting (Netlify, Cloudflare Pages, dll.). Untuk production, set `VITE_API_URL` ke URL API jika beda origin.
+- **Backend API:** `cd api && make build` → binary di `api/bin/server` (dan `bin/migrate`). **Tidak bisa di-host di GitHub Pages** (hanya static). Deploy ke PaaS (Railway, Render, Fly.io, Heroku) atau VPS; wajib set environment variable (`PORT`, `DB_DSN`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `JWT_SECRET`, `ALLOW_ORIGIN`) di layanan tersebut. Detail: [docs/DEPLOY.md](docs/DEPLOY.md).
+- **Frontend:** `cd web && npm run build` → output di `web/dist/`. Deploy isi `dist/` ke static hosting (GitHub Pages, Netlify, Cloudflare Pages). Untuk production, set `VITE_API_URL` ke URL backend API jika beda origin.
 
 ---
 
@@ -120,6 +120,7 @@ Token JWT berlaku 7 hari. Konfigurasi env (PORT, DB, ADMIN_*, JWT_SECRET, CORS):
 
 ## Dokumentasi lebih lanjut
 
+- [docs/DEPLOY.md](docs/DEPLOY.md) — **Strategi hosting** (frontend vs backend), env backend, CI/CD & GitHub Pages
 - [docs/STRUKTUR-PROYEK.md](docs/STRUKTUR-PROYEK.md) — Lokasi file berdasarkan fungsi (backend & frontend)
 - [docs/RUN-API.md](docs/RUN-API.md) — Menjalankan API, migrasi, Makefile
 - [api/README.md](api/README.md) — Quick start & endpoint API

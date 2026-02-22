@@ -11,8 +11,8 @@
 | **CI/CD** | ✅ | GitHub Actions: build + test API & Web, deploy ke GitHub Pages, auto-merge PR. |
 | **Tests** | ✅ | `api/tests/`: health, auth, status, admin, skills, middleware, database. |
 | **Frontend (Web)** | ✅ | Vue 3 + Vite: Hero, Nav, dark mode, responsive, Skills/Projects/Blog dari API, Login/Status. **Admin dashboard**: Overview, CRUD Kategori & Skills. CV download (letakkan cv.pdf di web/public). Certifications di About. |
-| **Domain & hosting** | 🔲 | Pilih domain, pastikan GitHub Pages / custom domain jika perlu. |
-| **Security hardening** | 🟡 | Lihat [docs/PHASE4-SECURITY.md](docs/PHASE4-SECURITY.md). CSP (API + meta SPA), HSTS, X-Frame-Options, hide Server ✅. Kontak mailto ✅; isi email + PGP. Analytics & form statis opsional. |
+| **Domain & hosting** | 🔲 | **Frontend:** GitHub Pages (atau Netlify/Cloudflare Pages). **Backend:** API Go tidak bisa di GitHub Pages — deploy ke PaaS (Railway, Render, Fly.io) atau VPS; set env (DB_DSN, JWT_SECRET, dll.) di hosting backend. Pilih domain jika perlu. |
+| **Security hardening** | 🟡 | Lihat [docs/PHASE4-SECURITY.md](docs/PHASE4-SECURITY.md). **Backend:** middleware Go set semua header (CSP, HSTS, X-Frame-Options, hide Server) pada response API. **Frontend (GitHub Pages):** tidak ada kontrol server-side — hanya CSP lewat `<meta>` di `index.html`; untuk HSTS/header tambahan pada SPA bisa pakai Cloudflare di depan jika custom domain. Kontak mailto ✅; isi email + PGP. Analytics & form statis opsional. |
 | **Easter eggs & polish** | 🔲 | 404 ✅ (custom), robots.txt ✅, sitemap.xml ✅ (ganti yoursite.com sebelum deploy). CLI easter egg opsional. |
 
 **Langkah berikut (saran):** Isi data projects & posts di DB (atau pakai fallback statis), letakkan cv.pdf di web/public, ganti domain di sitemap.xml, lalu security headers lanjutan (CSP, analytics).
@@ -27,11 +27,14 @@ Ini adalah tahap "Design Document" sebelum coding.
   1. Usahakan namaanda.com, namaanda.net, atau namaanda.id.
   2. Hindari domain gratisan (.tk, .ml) agar terlihat profesional.
 - Pilih Tech Stack
-  1. **Proyek ini:** Go (API) + Vue 3 (frontend), MySQL/MariaDB opsional. Frontend di-deploy static (Vite build → GitHub Pages).
+  1. **Proyek ini:** Go (API) + Vue 3 (frontend), MySQL/MariaDB opsional. Frontend di-deploy static (Vite build); backend API harus di-host terpisah (bukan static).
   2. Alternatif lain: Hugo, Astro, Jekyll untuk situs 100% statis (tanpa API).
-- Pilih Hosting
-  1. Rekomendasi: GitHub Pages, Netlify, atau Cloudflare Pages.
-  2. Alasan: Gratis tier cukup mumpuni, SSL otomatis, CDN global.
+- Pilih Hosting (dua komponen terpisah)
+  1. **Hosting Frontend (static):** GitHub Pages, Netlify, atau Cloudflare Pages. Gratis tier cukup, SSL otomatis, CDN. CI/CD saat ini deploy web build ke GitHub Pages.
+  2. **Hosting Backend API (kritis):** GitHub Pages hanya untuk static — **API Go tidak bisa berjalan di sana.** Pilih salah satu:
+     - **PaaS:** Railway, Render, Fly.io, Heroku (deploy binary atau dari repo; set env di dashboard).
+     - **VPS:** DigitalOcean, Linode, Vultr, dll. (jalankan binary `api/bin/server` + migrasi; set env di server atau `.env`).
+  3. **Environment variable** backend wajib diatur di layanan hosting backend: `PORT`, `DB_DSN` (atau `DB_USER`/`DB_PASSWORD`/`DB_HOST`/`DB_PORT`/`DB_NAME`), `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `JWT_SECRET`, `ALLOW_ORIGIN` (CORS, URL frontend). Lihat `api/configs/.env.example` dan [docs/DEPLOY.md](docs/DEPLOY.md).
 - Setup Version Control
   1. Buat repository private/public di GitHub/GitLab.
   2. Setup .gitignore yang proper.
@@ -84,8 +87,8 @@ Sebagai admin keamanan/jaringan, website Anda harus aman.
 - HTTPS/SSL Enforcement
   1. Wajib HTTPS (HSTS enabled).
 - Security Headers
-  1. Implementasi CSP (Content Security Policy).
-  2. Implementasi X-Frame-Options, X-Content-Type-Options.
+  1. **Backend (API):** Middleware Go set CSP, HSTS, X-Frame-Options, X-Content-Type-Options, hide Server — berlaku untuk setiap response API.
+  2. **Frontend (GitHub Pages):** Tidak ada kontrol header server-side; hanya CSP lewat `<meta http-equiv="Content-Security-Policy">` di `index.html`. Jika pakai custom domain, Cloudflare (gratis) di depan bisa menambahkan Security Headers dan HSTS untuk halaman SPA.
 - Kontak Aman
   1. Jangan pakai Contact Form PHP (rawan spam & exploit).
   2. Gunakan mailto: link biasa ATAU layanan form statis (Formspree/Netlify Forms).
