@@ -42,7 +42,7 @@ func Posts(db *database.DB) http.HandlerFunc {
 
 		switch r.Method {
 		case http.MethodGet:
-			idStr := handlers.SlugFromPath(r.URL.Path, "/admin/posts/")
+			idStr := handlers.SlugFromPath(r.URL.Path, "/api/admin/posts/")
 			if idStr != "" {
 				id, err := strconv.ParseInt(idStr, 10, 64)
 				if err != nil || id <= 0 {

@@ -20,7 +20,7 @@ Situs personal/portfolio dengan **backend API (Go)** dan **frontend (Vue 3 + Vit
 
 - **Go 1.21+** (untuk API)
 - **Node.js 18+** (untuk frontend)
-- **MySQL/MariaDB** (opsional; tanpa DB, API tetap jalan untuk health/status/login; data skills/projects/posts memerlukan DB)
+- **MySQL/MariaDB** (opsional; tanpa DB, API tetap jalan untuk `/api/health`, `/api/status`, `/api/login`; data skills/projects/posts memerlukan DB)
 
 ---
 
@@ -36,12 +36,12 @@ cp configs/.env.example configs/.env
 # Opsional: migrasi database
 go run ./cmd/migrate
 
-# Jalankan server (default http://localhost:8080)
+# Jalankan server (default http://localhost:8081, lihat PORT di .env)
 go run ./cmd/server
 # atau: make run
 ```
 
-Cek: [http://localhost:8080/health](http://localhost:8080/health), [http://localhost:8080/status](http://localhost:8080/status).
+Cek: [http://localhost:8081/api/health](http://localhost:8081/api/health), [http://localhost:8081/api/status](http://localhost:8081/api/status). Dokumentasi interaktif: [http://localhost:8081/api/docs](http://localhost:8081/api/docs).
 
 ### 2. Frontend (Web)
 
@@ -51,7 +51,7 @@ npm install
 npm run dev
 ```
 
-Frontend di [http://localhost:5173](http://localhost:5173). Vite mem-proxy `/api`, `/login`, dan `/admin` ke backend (port 8080).
+Frontend di [http://localhost:5173](http://localhost:5173). Vite mem-proxy `/api` ke backend (port 8081; semua endpoint di bawah `/api/` dan `/api/admin/`).
 
 ---
 
@@ -78,7 +78,7 @@ personal/
 │   │   ├── pages/         # Halaman (Home, About, Skills, Blog, admin/…)
 │   │   ├── components/    # Layout, AdminLayout
 │   │   ├── composables/   # useAuth, useApi
-│   │   └── router/        # Route + guard requiresAuth untuk /admin
+│   │   └── router/        # Route + guard requiresAuth untuk /admin (path frontend)
 │   ├── index.html
 │   ├── vite.config.js     # Proxy ke backend
 │   └── package.json
@@ -103,19 +103,21 @@ personal/
 
 ## Endpoint API (ringkas)
 
+Semua endpoint memakai prefix **`/api/`** (public) atau **`/api/admin/`** (protected).
+
 | Method | Path | Auth | Fungsi |
 |--------|------|------|--------|
-| GET | `/health` | — | Health check |
-| GET | `/status`, `/api/status` | — | Uptime & status DB |
-| POST | `/login` | — | Login admin → JWT |
+| GET | `/api/health` | — | Health check |
+| GET | `/api/status` | — | Uptime & status DB |
+| POST | `/api/login` | — | Login admin → JWT |
 | GET | `/api/skills` | — | Daftar skills |
 | GET | `/api/projects`, `/api/projects/:slug` | — | Daftar & detail proyek |
 | GET | `/api/posts`, `/api/posts/:slug` | — | Daftar & detail blog |
-| GET | `/admin` | Bearer JWT | Overview admin |
-| GET/POST/PUT/DELETE | `/admin/skill-categories` | Bearer JWT | CRUD kategori skill |
-| GET/POST/PUT/DELETE | `/admin/skills` | Bearer JWT | CRUD skills |
+| GET | `/api/admin` | Bearer JWT | Overview admin |
+| GET | `/api/admin/resources` | Bearer JWT | Schema CMS (list/form) |
+| GET/POST/PUT/DELETE | `/api/admin/skill-categories`, `skills`, `tools`, `tags`, `projects`, `posts` | Bearer JWT | CRUD resource admin |
 
-Token JWT berlaku 7 hari. Konfigurasi env (PORT, DB, ADMIN_*, JWT_SECRET, CORS): **api/configs/.env.example** dan **docs/api/README.md**.
+Token JWT berlaku 7 hari. Spesifikasi lengkap & Swagger: **api/docs/API.md**, `GET /api/docs`. Konfigurasi env: **api/configs/.env.example**, **docs/api/README.md**.
 
 ---
 

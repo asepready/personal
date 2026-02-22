@@ -9,84 +9,30 @@ Backend: **Go** (net/http), **MySQL/MariaDB** (opsional). Server tetap jalan tan
 | [DATABASE-SETUP.md](DATABASE-SETUP.md) | Membuat database dan user MySQL/MariaDB (CREATE DATABASE, CREATE USER, GRANT). |
 | [DATABASE.md](DATABASE.md) | Schema, tabel, migrasi, DSN, kode terkait, test koneksi. |
 
+**Spesifikasi endpoint lengkap:** [api/docs/API.md](../../api/docs/API.md). **Swagger UI (interaktif):** `GET http://<host>/api/docs` — dokumentasi OpenAPI di browser.
+
 ---
 
-## Endpoint
+## Endpoint (ringkas)
 
 | Method | Path | Auth | Deskripsi |
 |--------|------|------|-----------|
-| GET | `/health` | — | Health check |
-| GET | `/status` | — | Uptime + status database |
-| GET | `/api/skills` | — | Daftar skills (dari DB) |
-| POST | `/login` | — | Login admin → JWT |
-| GET | `/admin` | Bearer JWT | Area admin (protected) |
+| GET | `/api/health` | — | Health check |
+| GET | `/api/status` | — | Uptime + status database |
+| POST | `/api/login` | — | Login admin → JWT |
+| GET | `/api/skills` | — | Daftar skills |
+| GET | `/api/projects`, `/api/projects/:slug` | — | Daftar & detail proyek |
+| GET | `/api/posts`, `/api/posts/:slug` | — | Daftar & detail post (published) |
+| GET | `/api/admin` | Bearer JWT | Overview admin |
+| GET | `/api/admin/resources` | Bearer JWT | Schema resource CMS (list/form fields) |
+| GET/POST/PUT/DELETE | `/api/admin/skill-categories` | Bearer JWT | CRUD kategori skill |
+| GET/POST/PUT/DELETE | `/api/admin/skills` | Bearer JWT | CRUD skills |
+| GET/POST/PUT/DELETE | `/api/admin/tools` (+ GET `/api/admin/tools/:id`) | Bearer JWT | CRUD tools |
+| GET/POST/PUT/DELETE | `/api/admin/tags` (+ GET `/api/admin/tags/:id`) | Bearer JWT | CRUD tags |
+| GET/POST/PUT/DELETE | `/api/admin/projects` (+ GET `/api/admin/projects/:id`) | Bearer JWT | CRUD projects |
+| GET/POST/PUT/DELETE | `/api/admin/posts` (+ GET `/api/admin/posts/:id`) | Bearer JWT | CRUD posts |
 
-Semua response JSON memakai header `Content-Type: application/json`. Method selain yang tercantum mengembalikan `405 Method Not Allowed` (plain text).
-
----
-
-### GET /health
-
-- **Response 200:** `{"status":"ok"}`
-- Method lain: `405`
-
----
-
-### GET /status
-
-- **Response 200:**  
-  `{"status":"ok","uptime_seconds":<int64>,"database":"ok"|"disabled"|"error"}`
-- `database`: `ok` = terhubung, `disabled` = DB tidak dikonfigurasi, `error` = Ping gagal
-- Method lain: `405`
-
----
-
-### GET /api/skills
-
-- **Response 200:** `{"skills":[{"id":<int64>,"category_id":<int>,"name":"...","level":"...","icon_url":<string|null>,"category":"..."}, ...]}`
-- **Response 503:** `{"error":"database not configured"}` — DB tidak di-set atau nil
-- **Response 500:** `{"error":"query failed"}` — error saat query
-- Method lain: `405`
-
----
-
-### POST /login
-
-- **Request body (JSON):** `{"username":"...","password":"..."}`
-- **Response 200:** `{"token":"<jwt>"}`
-- **Response 400:** body invalid/bukan JSON → plain text `invalid body`
-- **Response 401:** kredensial salah → plain text `invalid credentials`
-- **Response 503:** login belum dikonfigurasi (ADMIN_USERNAME/ADMIN_PASSWORD/JWT_SECRET kosong) → plain text `login not configured`
-- **Response 500:** error pembuatan token → plain text `token error`
-- Method lain: `405`
-
----
-
-### GET /admin
-
-- **Header:** `Authorization: Bearer <token>` (JWT dari POST /login)
-- **Response 200:** `{"message":"Admin area"}`
-- **Response 401:** tidak ada header / token invalid → plain text `missing authorization` atau `invalid token`
-- **Response 503:** auth belum dikonfigurasi (JWT_SECRET kosong) → plain text `auth not configured`
-- Method lain: `405`
-
----
-
-### Admin CRUD (semua butuh header `Authorization: Bearer <token>`)
-
-**GET/POST/PUT/DELETE /admin/skill-categories** — Kelola tabel `skill_categories`.
-
-- **GET** — list: `{"categories":[{"id", "name", "slug", "sort_order"}, ...]}`
-- **POST** — create: body `{"name","slug","sort_order"}` → 201 `{"id", "name", "slug", "sort_order"}`
-- **PUT** — update: body `{"id", "name", "slug", "sort_order"}` → 200
-- **DELETE** — query `?id=<id>` → 200 `{"deleted": id}`
-
-**GET/POST/PUT/DELETE /admin/skills** — Kelola tabel `skills`.
-
-- **GET** — list: `{"skills":[{"id", "category_id", "name", "level", "icon_url", "category"}, ...]}`
-- **POST** — create: body `{"category_id", "name", "level", "icon_url"}` → 201
-- **PUT** — update: body `{"id", "category_id", "name", "level", "icon_url"}` → 200
-- **DELETE** — query `?id=<id>` → 200 `{"deleted": id}`
+Semua response JSON (`Content-Type: application/json`). Error: `{"error":"<pesan>"}`. Method tidak diizinkan → `405 Method Not Allowed`.
 
 ---
 
@@ -96,7 +42,7 @@ Server dan migrate membaca env dari **`api/configs/.env`** (dan `.env` di workin
 
 | Variabel | Deskripsi | Default / perilaku |
 |----------|-----------|--------------------|
-| `PORT` | Port HTTP server | 8080 |
+| `PORT` | Port HTTP server | 8081 |
 | `DB_DSN` | Connection string MySQL. Kosong = jalan tanpa DB. | Bisa diganti pakai komponen di bawah |
 | `DB_USER` | User MySQL (dipakai jika DB_DSN kosong) | — |
 | `DB_PASSWORD` | Password MySQL | — |
@@ -114,8 +60,8 @@ Jika `DB_DSN` kosong, DSN dibangun dari `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB
 
 ## Auth
 
-- **Login:** `POST /login` dengan body `{"username":"...","password":"..."}`. Jika cocok dengan `ADMIN_USERNAME`/`ADMIN_PASSWORD`, response berisi `{"token":"..."}` (JWT, expiry 24 jam).
-- **Admin:** kirim header `Authorization: Bearer <token>` untuk `GET /admin`. Token divalidasi dengan `JWT_SECRET`.
+- **Login:** `POST /api/login` dengan body `{"username":"...","password":"..."}`. Jika cocok dengan `ADMIN_USERNAME`/`ADMIN_PASSWORD`, response berisi `{"token":"..."}` (JWT, expiry 7 hari).
+- **Admin:** kirim header `Authorization: Bearer <token>` untuk semua path `/api/admin/*`. Token divalidasi dengan `JWT_SECRET`.
 
 ---
 
@@ -123,12 +69,14 @@ Jika `DB_DSN` kosong, DSN dibangun dari `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB
 
 1. **CORS** — set header CORS jika `ALLOW_ORIGIN` di-set; OPTIONS → 204.
 2. **SecurityHeaders** — header keamanan (X-Content-Type-Options, dll.).
-3. **RequireAuth** — hanya untuk `/admin`; cek Bearer JWT.
+3. **RequireAuth** — hanya untuk `/api/admin` dan subpath; cek Bearer JWT.
 
 ---
 
 ## Referensi lain
 
+- [api/docs/API.md](../../api/docs/API.md) — **spesifikasi lengkap semua endpoint**
+- [api/docs/](../../api/docs/) — SETUP, CONFIG, DATABASE, TESTS
 - [docs/RUN-API.md](../RUN-API.md) — cara menjalankan API
 - [docs/DEPLOY.md](../DEPLOY.md) — CI/CD, deploy
 - [api/README.md](../../api/README.md) — quick start & perintah make

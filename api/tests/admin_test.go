@@ -10,7 +10,7 @@ import (
 )
 
 func TestAdminOverview(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/admin", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/admin", nil)
 	rec := httptest.NewRecorder()
 	admin.Overview(rec, req)
 
@@ -29,7 +29,7 @@ func TestAdminOverview(t *testing.T) {
 }
 
 func TestAdminOverview_MethodNotAllowed(t *testing.T) {
-	req := httptest.NewRequest(http.MethodPost, "/admin", nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/admin", nil)
 	rec := httptest.NewRecorder()
 	admin.Overview(rec, req)
 	if rec.Code != http.StatusMethodNotAllowed {

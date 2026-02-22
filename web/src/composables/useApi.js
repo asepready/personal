@@ -19,7 +19,7 @@ export function useApiBase() {
 
   /** URL admin per resource (CMS dinamis). path = skill-categories | skills | tools | tags | projects | posts */
   function adminResourceUrl(path) {
-    return apiPath(`/admin/${path}`)
+    return apiPath(`/api/admin/${path}`)
   }
 
   return {
@@ -29,12 +29,12 @@ export function useApiBase() {
     projectBySlugUrl: (slug) => apiPathSlug('/api/projects', slug),
     postsUrl: () => apiPath('/api/posts'),
     postBySlugUrl: (slug) => apiPathSlug('/api/posts', slug),
-    loginUrl: () => apiPath('/login'),
+    loginUrl: () => apiPath('/api/login'),
     statusUrl: () => apiPath('/api/status'),
-    adminUrl: () => apiPath('/admin'),
-    adminResourcesUrl: () => apiPath('/admin/resources'),
-    adminCategoriesUrl: () => apiPath('/admin/skill-categories'),
-    adminSkillsUrl: () => apiPath('/admin/skills'),
+    adminUrl: () => apiPath('/api/admin'),
+    adminResourcesUrl: () => apiPath('/api/admin/resources'),
+    adminCategoriesUrl: () => apiPath('/api/admin/skill-categories'),
+    adminSkillsUrl: () => apiPath('/api/admin/skills'),
     adminResourceUrl,
   }
 }

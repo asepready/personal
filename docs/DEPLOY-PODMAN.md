@@ -13,7 +13,7 @@ Deploy aplikasi sebagai **microservice** dengan Podman (atau Docker): **API (Go)
                            │ :8080
                     ┌──────▼──────┐
                     │    web      │  nginx (static + proxy)
-                    │  (frontend) │  /api, /login, /admin → api:8081
+                    │  (frontend) │  /api/* → api:8081
                     └──────┬──────┘
                            │
               ┌────────────┼────────────┐

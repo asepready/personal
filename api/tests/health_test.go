@@ -21,7 +21,7 @@ func TestHealth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.method, func(t *testing.T) {
-			req := httptest.NewRequest(tt.method, "/health", nil)
+			req := httptest.NewRequest(tt.method, "/api/health", nil)
 			rec := httptest.NewRecorder()
 			handlers.Health(rec, req)
 

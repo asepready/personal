@@ -41,7 +41,7 @@ func Projects(db *database.DB) http.HandlerFunc {
 
 		switch r.Method {
 		case http.MethodGet:
-			idStr := handlers.SlugFromPath(r.URL.Path, "/admin/projects/")
+			idStr := handlers.SlugFromPath(r.URL.Path, "/api/admin/projects/")
 			if idStr != "" {
 				id, err := strconv.ParseInt(idStr, 10, 64)
 				if err != nil || id <= 0 {

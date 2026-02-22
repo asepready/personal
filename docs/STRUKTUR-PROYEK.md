@@ -50,9 +50,14 @@ Dokumen ini memetakan lokasi file di repository berdasarkan **fungsi** (apa pera
 | `api/internal/handlers/skills.go` | GET /api/skills (list skills, public) |
 | `api/internal/handlers/projects.go` | GET /api/projects (list), GET /api/projects/:slug (detail + tools) |
 | `api/internal/handlers/posts.go` | GET /api/posts (list published), GET /api/posts/:slug (detail) |
-| `api/internal/handlers/admin/overview.go` | GET /admin (overview, perlu auth) |
-| `api/internal/handlers/admin/categories.go` | CRUD /admin/skill-categories |
-| `api/internal/handlers/admin/skills.go` | CRUD /admin/skills |
+| `api/internal/handlers/admin/overview.go` | GET /api/admin (overview, perlu auth) |
+| `api/internal/handlers/admin/resources.go` | GET /api/admin/resources (schema CMS) |
+| `api/internal/handlers/admin/categories.go` | CRUD /api/admin/skill-categories |
+| `api/internal/handlers/admin/skills.go` | CRUD /api/admin/skills |
+| `api/internal/handlers/admin/tools.go` | CRUD /api/admin/tools |
+| `api/internal/handlers/admin/tags.go` | CRUD /api/admin/tags |
+| `api/internal/handlers/admin/projects.go` | CRUD /api/admin/projects |
+| `api/internal/handlers/admin/posts.go` | CRUD /api/admin/posts |
 
 ### Middleware
 | Lokasi | Fungsi |
@@ -99,7 +104,7 @@ Dokumen ini memetakan lokasi file di repository berdasarkan **fungsi** (apa pera
 ### Routing
 | Lokasi | Fungsi |
 |--------|--------|
-| `web/src/router/index.js` | Definisi route, guard `requiresAuth` untuk /admin |
+| `web/src/router/index.js` | Definisi route, guard `requiresAuth` untuk area admin |
 
 ### Halaman (per route)
 | Lokasi | Fungsi |

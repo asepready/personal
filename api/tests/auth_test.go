@@ -25,7 +25,7 @@ func TestLogin_Success(t *testing.T) {
 
 	body := handlers.LoginRequest{Username: "admin", Password: "secret123"}
 	raw, _ := json.Marshal(body)
-	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(raw))
+	req := httptest.NewRequest(http.MethodPost, "/api/login", bytes.NewReader(raw))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
@@ -48,7 +48,7 @@ func TestLogin_InvalidCredentials(t *testing.T) {
 
 	body := handlers.LoginRequest{Username: "admin", Password: "wrong"}
 	raw, _ := json.Marshal(body)
-	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(raw))
+	req := httptest.NewRequest(http.MethodPost, "/api/login", bytes.NewReader(raw))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
@@ -60,7 +60,7 @@ func TestLogin_InvalidCredentials(t *testing.T) {
 
 func TestLogin_MethodNotAllowed(t *testing.T) {
 	handler := handlers.Login(testLoginConfig())
-	req := httptest.NewRequest(http.MethodGet, "/login", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/login", nil)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 	if rec.Code != http.StatusMethodNotAllowed {
@@ -73,7 +73,7 @@ func TestLogin_NotConfigured(t *testing.T) {
 	handler := handlers.Login(cfg)
 	body := handlers.LoginRequest{Username: "a", Password: "b"}
 	raw, _ := json.Marshal(body)
-	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader(raw))
+	req := httptest.NewRequest(http.MethodPost, "/api/login", bytes.NewReader(raw))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
@@ -84,7 +84,7 @@ func TestLogin_NotConfigured(t *testing.T) {
 
 func TestLogin_InvalidBody(t *testing.T) {
 	handler := handlers.Login(testLoginConfig())
-	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewReader([]byte("not json")))
+	req := httptest.NewRequest(http.MethodPost, "/api/login", bytes.NewReader([]byte("not json")))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)

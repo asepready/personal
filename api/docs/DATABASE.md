@@ -4,9 +4,7 @@ API memakai MySQL/MariaDB. Koneksi opsional: jika `DB_DSN` kosong atau gagal, se
 
 ## Schema referensi
 
-Skema lengkap (normalisasi + indeks performa) ada di:
-
-**`internal/database/table.sql`**
+Schema aktif ditentukan oleh migrasi di **`internal/database/migrations/`** (`001_initial.up.sql`, `002_*.up.sql`). Referensi ringkas juga di **`internal/database/table.sql`** (jika ada).
 
 Tabel utama:
 
@@ -24,7 +22,7 @@ Tabel utama:
 | `monitoring_services` | Layanan untuk uptime. |
 | `uptime_logs` | Log status/response time per layanan. |
 
-Indeks dirancang untuk query yang dipakai backend (list by category, by slug, featured, status+published_at, dsb.). Lihat komentar di `table.sql`.
+Indeks dirancang untuk query yang dipakai backend (list by category, by slug, featured, status+published_at, dsb.). Lihat file migrasi dan `table.sql` untuk detail.
 
 ## Migrasi
 

@@ -4,7 +4,7 @@
 
 | Area | Status | Keterangan |
 |------|--------|------------|
-| **Backend API** | ✅ | Go: `/health`, `/status`, `/api/skills`, `/login`, `/admin` (JWT). CRUD admin: `/admin/skill-categories`, `/admin/skills`. Middleware CORS & security headers. |
+| **Backend API** | ✅ | Go: `/api/health`, `/api/status`, `/api/skills`, `/api/login`, `/api/admin` (JWT). CRUD admin: `/api/admin/skill-categories`, `/api/admin/skills`, tools, tags, projects, posts. Middleware CORS & security headers. Swagger: `/api/docs`. |
 | **Database** | ✅ | MySQL/MariaDB opsional, migrasi (001 + 002), schema users, skills, projects, posts, dll. |
 | **Config & env** | ✅ | `api/configs/.env`, DSN dari DB_DSN atau DB_USER/DB_PASSWORD/DB_HOST/DB_PORT/DB_NAME. |
 | **Dokumentasi** | ✅ | `docs/api/` (README, DATABASE, DATABASE-SETUP), RUN-API, DEPLOY, STRUKTUR-PROYEK. |
@@ -104,7 +104,7 @@ Sebagai admin keamanan/jaringan, website Anda harus aman.
 Menunjukkan Anda mempraktikkan apa yang Anda preach.
 
 - Uptime Status Page
-  1. Buat halaman kecil /status yang menampilkan uptime website Anda sendiri (menggunakan Uptime Kuma atau sejenisnya).
+  1. Buat halaman kecil Status (data dari GET /api/status) yang menampilkan uptime website Anda sendiri (menggunakan Uptime Kuma atau sejenisnya).
   2. Ini menunjukkan Anda peduli pada monitoring.
 - CI/CD Pipeline
   1. Setup GitHub Actions untuk auto-deploy saat ada push ke branch main.
@@ -162,7 +162,7 @@ Fitur opsional untuk menunjukkan kreativitas & humor teknis.
 | 4 | Kontak aman (mailto / form statis) | ✅ (mailto di Contact.vue; isi email & PGP) |
 | 4 | Privacy-friendly analytics | 🔲 (opsional: Plausible/Umami di index.html) |
 | 4 | Hide server info | ✅ (X-Powered-By del, Server kosong di middleware) |
-| 5 | Uptime/status (GET /status) | ✅ |
+| 5 | Uptime/status (GET /api/status) | ✅ |
 | 5 | CI/CD (GitHub Actions) | ✅ |
 | 5 | Backup strategy (remote repo) | 🔲 |
 | 5 | DNS (SPF, DKIM, DMARC untuk email) | 🔲 |

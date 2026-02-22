@@ -3,7 +3,7 @@
 ## Persyaratan
 
 - Go 1.21+
-- MySQL/MariaDB (opsional; API bisa jalan tanpa DB untuk `/health`, `/status`, `/login`, `/admin`)
+- MySQL/MariaDB (opsional; API bisa jalan tanpa DB untuk `/api/health`, `/api/status`, `/api/login`, `/api/admin`)
 
 ## Langkah
 
@@ -46,7 +46,7 @@ Atau pakai Makefile:
 make run
 ```
 
-Server listen di `http://localhost:8080` (atau `PORT` di env).
+Server listen di `http://localhost:8081` (atau `PORT` di env).
 
 ### 4. Tes
 

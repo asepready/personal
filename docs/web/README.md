@@ -8,11 +8,11 @@ Stack: **Vue 3**, **Vue Router**, **Vite**, **Tailwind CSS**.
 - `src/components/` — Layout (header, nav, dark mode)
 - `src/composables/useAuth.js` — state login & token
 - `src/composables/useApi.js` — base URL API & helper `skillsUrl()`, `loginUrl()`, `statusUrl()`, `adminUrl()`
-- `src/router/index.js` — route + guard `requiresAuth` untuk /admin
+- `src/router/index.js` — route + guard `requiresAuth` untuk area admin (path frontend /admin)
 
 ## Script
 
-- `npm run dev` — development; proxy mengirim `/api`, `/login`, `/status`, `/admin` ke backend (default `http://localhost:8080`)
+- `npm run dev` — development; proxy mengirim `/api` ke backend (default `http://localhost:8081`); semua endpoint API di `/api/` dan `/api/admin/`
 - `npm run build` — build produksi ke `dist/`
 - `npm run preview` — preview build
 
@@ -29,6 +29,6 @@ Jika backend API tidak tersedia (maintenance, error, atau CORS), halaman **Skill
 
 ## Env
 
-- **`VITE_API_URL`** — Base URL backend jika frontend dan API beda origin (mis. `https://api.yoursite.com`). Jika kosong, request pakai path relatif (`/api/skills`, `/login`, `/status`, `/admin`). Di dev, Vite proxy meneruskan ke `http://localhost:8080`; di production pastikan reverse proxy atau CORS mengarahkan path tersebut ke backend.
+- **`VITE_API_URL`** — Base URL backend jika frontend dan API beda origin (mis. `https://api.yoursite.com`). Jika kosong, request pakai path relatif (`/api/skills`, `/api/login`, `/api/status`, `/api/admin`, dll.). Di dev, Vite proxy meneruskan `/api` ke `http://localhost:8081`; di production pastikan reverse proxy atau CORS mengarahkan `/api` ke backend.
 
 Referensi: [ToDo.md](../../ToDo.md), [STRUKTUR-PROYEK.md](../STRUKTUR-PROYEK.md).

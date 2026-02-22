@@ -13,6 +13,7 @@ import (
 	"github.com/personal/api/internal/handlers"
 	"github.com/personal/api/internal/handlers/admin"
 	"github.com/personal/api/internal/middleware"
+	"github.com/personal/api/internal/spec"
 )
 
 func main() {
@@ -37,28 +38,36 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", handlers.Health)
-	mux.HandleFunc("/status", handlers.Status(cfg.StartTime, db))
-	mux.HandleFunc("/api/status", handlers.Status(cfg.StartTime, db)) // untuk frontend (hindari konflik route SPA /status)
+	// Public API: semua di bawah /api/
+	mux.HandleFunc("/api/health", handlers.Health)
+	mux.HandleFunc("/api/status", handlers.Status(cfg.StartTime, db))
+	mux.HandleFunc("/api/login", handlers.Login(cfg))
 	mux.HandleFunc("/api/skills", handlers.SkillsList(db))
 	mux.HandleFunc("/api/projects", handlers.ProjectsList(db))
 	mux.HandleFunc("/api/projects/", handlers.ProjectBySlug(db))
 	mux.HandleFunc("/api/posts", handlers.PostsList(db))
 	mux.HandleFunc("/api/posts/", handlers.PostBySlug(db))
-	mux.HandleFunc("/login", handlers.Login(cfg))
-	// Admin dashboard API (CRUD) — paket handlers/admin, CMS-style dinamis
-	mux.Handle("/admin/resources", middleware.RequireAuth(cfg, http.HandlerFunc(admin.Resources)))
-	mux.Handle("/admin/skill-categories", middleware.RequireAuth(cfg, admin.Categories(db)))
-	mux.Handle("/admin/skills", middleware.RequireAuth(cfg, admin.Skills(db)))
-	mux.Handle("/admin/tools/", middleware.RequireAuth(cfg, admin.Tools(db)))
-	mux.Handle("/admin/tools", middleware.RequireAuth(cfg, admin.Tools(db)))
-	mux.Handle("/admin/tags/", middleware.RequireAuth(cfg, admin.Tags(db)))
-	mux.Handle("/admin/tags", middleware.RequireAuth(cfg, admin.Tags(db)))
-	mux.Handle("/admin/projects/", middleware.RequireAuth(cfg, admin.Projects(db)))
-	mux.Handle("/admin/projects", middleware.RequireAuth(cfg, admin.Projects(db)))
-	mux.Handle("/admin/posts/", middleware.RequireAuth(cfg, admin.Posts(db)))
-	mux.Handle("/admin/posts", middleware.RequireAuth(cfg, admin.Posts(db)))
-	mux.Handle("/admin", middleware.RequireAuth(cfg, http.HandlerFunc(admin.Overview)))
+	// Swagger UI: http://host/api/docs atau http://host/api/docs/
+	mux.HandleFunc("/api/docs", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/docs" {
+			return
+		}
+		http.Redirect(w, r, "/api/docs/", http.StatusFound)
+	})
+	mux.Handle("/api/docs/", http.StripPrefix("/api/docs", spec.Handler()))
+	// Admin API: semua di bawah /api/admin/
+	mux.Handle("/api/admin/resources", middleware.RequireAuth(cfg, http.HandlerFunc(admin.Resources)))
+	mux.Handle("/api/admin/skill-categories", middleware.RequireAuth(cfg, admin.Categories(db)))
+	mux.Handle("/api/admin/skills", middleware.RequireAuth(cfg, admin.Skills(db)))
+	mux.Handle("/api/admin/tools/", middleware.RequireAuth(cfg, admin.Tools(db)))
+	mux.Handle("/api/admin/tools", middleware.RequireAuth(cfg, admin.Tools(db)))
+	mux.Handle("/api/admin/tags/", middleware.RequireAuth(cfg, admin.Tags(db)))
+	mux.Handle("/api/admin/tags", middleware.RequireAuth(cfg, admin.Tags(db)))
+	mux.Handle("/api/admin/projects/", middleware.RequireAuth(cfg, admin.Projects(db)))
+	mux.Handle("/api/admin/projects", middleware.RequireAuth(cfg, admin.Projects(db)))
+	mux.Handle("/api/admin/posts/", middleware.RequireAuth(cfg, admin.Posts(db)))
+	mux.Handle("/api/admin/posts", middleware.RequireAuth(cfg, admin.Posts(db)))
+	mux.Handle("/api/admin", middleware.RequireAuth(cfg, http.HandlerFunc(admin.Overview)))
 
 	addr := ":" + strconv.Itoa(cfg.Port)
 

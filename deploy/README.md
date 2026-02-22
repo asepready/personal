@@ -58,7 +58,7 @@ Lalu jalankan API dengan `DB_DSN` yang mengarah ke IP/host MariaDB (mis. `host.d
 ### Cek
 
 - Web: http://localhost  
-- API: http://localhost:8080/health (atau endpoint yang Anda buat)
+- API: http://localhost:8080/api/health (atau http://localhost:8081/api/health jika backend standalone)
 
 ### Stop & hapus
 
@@ -77,7 +77,7 @@ podman run -d --name api --network personal-net -p 8080:8080 personal-api
 podman run -d --name personal-web --network personal-net -p 80:80 personal-web
 ```
 
-Akses http://localhost; request ke `/api/status` akan di-proxy ke backend.
+Akses http://localhost; request ke `/api/*` akan di-proxy ke backend (api:8080 atau api:8081).
 
 ## Referensi
 

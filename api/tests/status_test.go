@@ -14,7 +14,7 @@ func TestStatus_NoDB(t *testing.T) {
 	startTime := time.Now().Add(-10 * time.Second).Unix()
 	handler := handlers.Status(startTime, nil)
 
-	req := httptest.NewRequest(http.MethodGet, "/status", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/status", nil)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 
@@ -38,7 +38,7 @@ func TestStatus_NoDB(t *testing.T) {
 
 func TestStatus_MethodNotAllowed(t *testing.T) {
 	handler := handlers.Status(1, nil)
-	req := httptest.NewRequest(http.MethodPost, "/status", nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/status", nil)
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)
 	if rec.Code != http.StatusMethodNotAllowed {

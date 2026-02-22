@@ -8,12 +8,12 @@ Variabel dibaca dari environment; di development bisa pakai file `.env` di folde
 
 | Variabel | Wajib | Default | Deskripsi |
 |----------|-------|---------|-----------|
-| `PORT` | Tidak | `8080` | Port HTTP server (1–65535). |
-| `DB_DSN` | Tidak | (kosong) | DSN MySQL/MariaDB. Kosong = API jalan tanpa DB (skills 503, status database "disabled"). |
+| `PORT` | Tidak | `8081` | Port HTTP server (1–65535). Di Windows jika port diblokir, coba 8081 atau 8888. |
+| `DB_DSN` | Tidak | (kosong) | DSN MySQL/MariaDB. Kosong = API jalan tanpa DB (skills/projects/posts 503, status database "disabled"). Bisa juga pakai komponen: `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_NAME`. |
 | `ADMIN_USERNAME` | Untuk login | — | Username admin (login). |
 | `ADMIN_PASSWORD` | Untuk login | — | Password admin (login). |
-| `JWT_SECRET` | Untuk login & /admin | — | Secret untuk tanda-tangan JWT (min 32 karakter, HS256). |
-| `ALLOW_ORIGIN` | Tidak | (kosong) | Origin yang diizinkan CORS (mis. `https://frontend.example.com`). Kosong = tidak ada header CORS. |
+| `JWT_SECRET` | Untuk login & /api/admin | — | Secret untuk tanda-tangan JWT (min 32 karakter, HS256). |
+| `ALLOW_ORIGIN` | Tidak | (kosong) | Origin yang diizinkan CORS (mis. `https://frontend.example.com`). Kosong = tidak ada header CORS. Jangan pakai `*` di production. |
 
 ## Format DSN
 
@@ -29,7 +29,7 @@ Contoh:
 ## Contoh .env minimal (development)
 
 ```env
-PORT=8080
+PORT=8081
 DB_DSN=root:password@tcp(localhost:3306)/personal?parseTime=true
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=change_me

@@ -14,7 +14,7 @@ Backend HTTP (Go) untuk situs personal: health, status, auth (JWT), area admin, 
 # Konfigurasi (copy dan isi .env)
 cp configs/.env.example configs/.env
 
-# Jalankan server (default http://localhost:8080)
+# Jalankan server (default http://localhost:8081, lihat PORT di .env)
 go run ./cmd/server
 # atau
 make run
@@ -28,15 +28,17 @@ go run ./cmd/migrate
 
 ## Endpoint utama
 
+Semua endpoint memakai prefix **`/api/`** (public) atau **`/api/admin/`** (protected).
+
 | Method | Path | Auth | Fungsi |
 |--------|------|------|--------|
-| GET | `/health` | — | Health check `{"status":"ok"}` |
-| GET | `/status` | — | Uptime + status database |
-| POST | `/login` | — | Login admin → JWT |
+| GET | `/api/health` | — | Health check `{"status":"ok"}` |
+| GET | `/api/status` | — | Uptime + status database |
+| POST | `/api/login` | — | Login admin → JWT |
 | GET | `/api/skills` | — | Daftar skills (dari DB) |
-| GET | `/admin` | Bearer JWT | Area admin |
+| GET | `/api/admin` | Bearer JWT | Area admin (overview, resources, CRUD) |
 
-Detail request/response dan konfigurasi: **[docs/api/README.md](../docs/api/README.md)**.
+Detail request/response, CRUD admin, dan konfigurasi: **[docs/api/README.md](../docs/api/README.md)**. Spesifikasi OpenAPI & Swagger UI: **GET /api/docs**.
 
 ## Konfigurasi
 

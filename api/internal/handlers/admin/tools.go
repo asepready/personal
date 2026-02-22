@@ -32,7 +32,7 @@ func Tools(db *database.DB) http.HandlerFunc {
 
 		switch r.Method {
 		case http.MethodGet:
-			idStr := handlers.SlugFromPath(r.URL.Path, "/admin/tools/")
+			idStr := handlers.SlugFromPath(r.URL.Path, "/api/admin/tools/")
 			if idStr != "" {
 				id, err := strconv.ParseInt(idStr, 10, 64)
 				if err != nil || id <= 0 {

@@ -7,7 +7,7 @@ API backend (Go) di folder **`api/`**. Semua perintah di bawah dijalankan dari f
 ## 1. Persyaratan
 
 - **Go 1.21+**
-- **MySQL/MariaDB** (opsional; tanpa DB, API tetap jalan untuk `/health`, `/status`, `/login`, `/admin`; `/api/skills` mengembalikan 503)
+- **MySQL/MariaDB** (opsional; tanpa DB, API tetap jalan untuk `/api/health`, `/api/status`, `/api/login`, `/api/admin`; `/api/skills` mengembalikan 503)
 
 ---
 
@@ -22,7 +22,7 @@ cp configs/.env.example configs/.env
 
 Edit **`api/configs/.env`**:
 
-- **PORT** — port server (default `8080`)
+- **PORT** — port server (default `8081`)
 - **DB_DSN** atau (**DB_USER**, **DB_PASSWORD**, **DB_HOST**, **DB_PORT**, **DB_NAME**) — koneksi database
 - **ADMIN_USERNAME**, **ADMIN_PASSWORD** — kredensial login admin
 - **JWT_SECRET** — minimal 32 karakter untuk tanda-tangan JWT
@@ -66,12 +66,13 @@ Atau pakai Makefile:
 make run
 ```
 
-Server listen di **`http://localhost:8080`** (atau sesuai **PORT** di `.env`).
+Server listen di **`http://localhost:8081`** (atau sesuai **PORT** di `.env`).
 
 Cek:
 
-- Health: **http://localhost:8080/health**
-- Status: **http://localhost:8080/status**
+- Health: **http://localhost:8081/api/health**
+- Status: **http://localhost:8081/api/status**
+- Swagger: **http://localhost:8081/api/docs**
 
 ---
 

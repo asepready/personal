@@ -199,7 +199,8 @@ go build -o bin/server ./cmd/server
 .\bin\server
 ```
 
-Di terminal lain: `curl http://localhost:8080/health` → `{"status":"ok"}`.
+Di terminal lain: `curl http://localhost:8080/health` → `{"status":"ok"}`.  
+*(Dalam proyek ini, server API memakai prefix `/api/` dan default PORT 8081; health check: `http://localhost:8081/api/health`.)*
 
 ### 2.3 Driver MariaDB/MySQL
 
