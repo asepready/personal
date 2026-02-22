@@ -81,5 +81,5 @@ Akses http://localhost; request ke `/api/*` akan di-proxy ke backend (api:8080 a
 
 ## Referensi
 
-- Langkah inisialisasi proyek: [doc/SETUP-COMMANDS.md](../doc/SETUP-COMMANDS.md)
+- Langkah inisialisasi proyek: [docs/SETUP-COMMANDS.md](../docs/SETUP-COMMANDS.md)
 - ToDo & fase pengembangan: [ToDo.md](../ToDo.md)

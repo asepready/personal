@@ -1,19 +1,21 @@
 # Web (Vue + nginx) — frontend microservice, proxy ke API
 # Build: podman build -t personal-web -f web/Containerfile web/
-FROM node:20-alpine AS builder
+# Debian slim: Rollup/Vite native bindings butuh glibc; Alpine (musl) sering MODULE_NOT_FOUND
+FROM node:20-slim AS builder
 WORKDIR /app
 
-# npm install lebih toleran di container (Windows/Podman) daripada npm ci
 COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
-# Build tanpa VITE_API_URL = same-origin; nginx akan proxy /api, /login, /admin ke backend
+# Hindari OOM saat build di container; same-origin = nginx proxy /api ke backend
+ENV NODE_OPTIONS=--max-old-space-size=4096
 RUN npm run build
 
-# Runtime: nginx
-FROM nginx:alpine
+# Runtime: nginx unprivileged (rootless — proses non-root, listen 8080)
+FROM nginxinc/nginx-unprivileged:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+EXPOSE 8080
+USER nginx
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,4 +1,5 @@
 # Podman/Docker Compose — deploy microservice (api, web, db)
+# Rootless: api & web jalan sebagai non-root; cocok untuk rootless Podman.
 # Jalankan: podman-compose up -d   atau: podman compose up -d
 # Build: podman-compose up -d --build
 
@@ -33,7 +34,7 @@ services:
     container_name: personal-web
     restart: unless-stopped
     ports:
-      - "8080:80"
+      - "8080:8080"   # rootless: nginx listen 8080 di dalam container
     depends_on:
       - api
     networks:

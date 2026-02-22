@@ -10,15 +10,18 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /server ./cmd/server && \
     CGO_ENABLED=0 GOOS=linux go build -o /migrate ./cmd/migrate
 
-# Runtime
+# Runtime (rootless: jalankan sebagai non-root)
 FROM alpine:3.19
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata && \
+    adduser -D -u 1000 app
 WORKDIR /app
 COPY --from=builder /server .
 COPY --from=builder /migrate .
+RUN chown -R app:app /app
 
 EXPOSE 8081
 ENV PORT=8081
 
+USER app
 # Env dari compose: DB_DSN, ADMIN_USERNAME, ADMIN_PASSWORD, JWT_SECRET, ALLOW_ORIGIN
 CMD ["./server"]

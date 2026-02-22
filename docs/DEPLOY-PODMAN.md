@@ -28,8 +28,8 @@ Deploy aplikasi sebagai **microservice** dengan Podman (atau Docker): **API (Go)
 
 | Service | Image | Port | Keterangan |
 |--------|--------|------|------------|
-| **web** | personal-web (Vue build + nginx) | 8080→80 | SPA + reverse proxy ke API |
-| **api** | personal-api (Go binary) | 8081 (internal) | Backend, hanya diakses dari web |
+| **web** | personal-web (Vue + nginx unprivileged) | 8080→8080 | SPA + proxy ke API; **rootless** (non-root) |
+| **api** | personal-api (Go binary) | 8081 (internal) | Backend; **rootless** (user `app`, uid 1000) |
 | **db** | mariadb:11 | 3306 (internal) | Database |
 
 ---
@@ -39,6 +39,8 @@ Deploy aplikasi sebagai **microservice** dengan Podman (atau Docker): **API (Go)
 - **Podman** (atau Docker) + **Podman Compose** / **Docker Compose**
   - Windows: [Podman Desktop](https://podman-desktop.io/) atau WSL2 + Podman
   - Linux: `podman`, `podman-compose` (atau `podman compose` v4.1+)
+
+**Rootless:** Container **api** dan **web** berjalan sebagai non-root (user `app` / `nginx`), cocok untuk rootless Podman atau lingkungan yang membatasi proses root.
 
 ---
 
