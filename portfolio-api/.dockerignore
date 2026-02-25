@@ -1,0 +1,9 @@
+/vendor
+/.git
+.env
+.env.*
+!.env.example
+.phpunit.result.cache
+*.md
+tests
+.phpunit.cache

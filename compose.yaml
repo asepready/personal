@@ -1,39 +1,70 @@
+# Podman / Docker Compose - Portfolio stack
+# Run: podman-compose up -d   or   docker compose up -d
+
 services:
   db:
-    image: mariadb:latest
+    image: mariadb:10.11
+    container_name: portfolio-db
     environment:
-      MARIADB_ROOT_PASSWORD: rootpassword
-      MARIADB_DATABASE: portfolio
-      MARIADB_USER: user
-      MARIADB_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE:-personal_portfolio}
+      MYSQL_USER: ${DB_USERNAME:-portfolio}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-portfolio_pass}
+    volumes:
+      - portfolio-db-data:/var/lib/mysql
     ports:
       - "3306:3306"
-    volumes:
-      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 30s
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build:
-      context: ./api
-      dockerfile: ../deployment/api/Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
+      context: ./api-portfolio
+      dockerfile: Containerfile
+    container_name: portfolio-api
+    env_file:
+      - ./api-portfolio/.env.podman
     environment:
       DB_HOST: db
       DB_PORT: 3306
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: portfolio
+      DB_DATABASE: ${DB_DATABASE:-personal_portfolio}
+      DB_USERNAME: ${DB_USERNAME:-portfolio}
+      DB_PASSWORD: ${DB_PASSWORD:-portfolio_pass}
+      APP_ENV: production
+      APP_DEBUG: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
 
   web:
     build:
-      context: ./web
-      dockerfile: ../deployment/web/Dockerfile
+      context: ./portfolio-web
+      dockerfile: Containerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+    container_name: portfolio-web
     ports:
-      - "80:80"
+      - "3000:80"
+    depends_on:
+      - api
+
+  admin:
+    build:
+      context: ./portfolio-admin
+      dockerfile: Containerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-}
+    container_name: portfolio-admin
+    ports:
+      - "3001:80"
     depends_on:
       - api
 
 volumes:
-  db_data:
+  portfolio-db-data:

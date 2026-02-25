@@ -1,0 +1,1338 @@
+openapi: 3.0.3
+info:
+  title: Personal Portfolio API
+  description: |
+    REST API for personal portfolio. Public read (GET) and POST /api/contact do not require auth.
+    Mutating operations (POST/PUT/PATCH/DELETE) and all contact-messages endpoints require
+    Authorization Bearer token (admin). Use `php artisan make:token` to generate a token.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost/api-portfolio/public
+    description: Local development (Laragon)
+  - url: https://domainanda.com/api
+    description: Production
+
+tags:
+  - name: Users
+    description: Profile users
+  - name: Experiences
+    description: Work experiences
+  - name: Educations
+    description: Education records
+  - name: Skill Categories
+    description: Skill category taxonomy
+  - name: Skills
+    description: Skills
+  - name: User Skills
+    description: User–skill pivot (proficiency)
+  - name: Projects
+    description: Projects
+  - name: Project Skills
+    description: Project–skill pivot
+  - name: Blog Posts
+    description: Blog posts
+  - name: Tags
+    description: Tags for posts
+  - name: Post Tags
+    description: Blog post–tag pivot
+  - name: Certifications
+    description: Certifications
+  - name: Contact Messages
+    description: Contact form messages (admin only)
+  - name: Public Contact
+    description: Public contact form (no auth)
+
+paths:
+  /api/contact:
+    post:
+      tags: [Public Contact]
+      summary: Submit contact message (public, no auth)
+      description: Rate limited (5 requests/minute per IP). user_id is set by server (CONTACT_OWNER_USER_ID).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, subject, message]
+              properties:
+                name: { type: string, maxLength: 255 }
+                email: { type: string, format: email, maxLength: 255 }
+                subject: { type: string, maxLength: 255 }
+                message: { type: string, maxLength: 65535 }
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /api/users:
+    get:
+      tags: [Users]
+      summary: List users
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Users]
+      summary: Create user
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Users]
+      summary: Update user
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Users]
+      summary: Partially update user
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Users]
+      summary: Delete user
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/experiences:
+    get:
+      tags: [Experiences]
+      summary: List experiences
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Experiences]
+      summary: Create experience
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/experiences/{id}:
+    get:
+      tags: [Experiences]
+      summary: Get experience by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Experiences]
+      summary: Update experience
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Experiences]
+      summary: Partially update experience
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperienceInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Experiences]
+      summary: Delete experience
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/educations:
+    get:
+      tags: [Educations]
+      summary: List educations
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Educations]
+      summary: Create education
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EducationInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/educations/{id}:
+    get:
+      tags: [Educations]
+      summary: Get education by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Educations]
+      summary: Update education
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EducationInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Educations]
+      summary: Partially update education
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EducationInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Educations]
+      summary: Delete education
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/skill-categories:
+    get:
+      tags: [Skill Categories]
+      summary: List skill categories
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Skill Categories]
+      summary: Create skill category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillCategoryInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/skill-categories/{id}:
+    get:
+      tags: [Skill Categories]
+      summary: Get skill category by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Skill Categories]
+      summary: Update skill category
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillCategoryInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Skill Categories]
+      summary: Partially update skill category
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillCategoryInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Skill Categories]
+      summary: Delete skill category
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/skills:
+    get:
+      tags: [Skills]
+      summary: List skills
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: skill_category_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Skills]
+      summary: Create skill
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/skills/{id}:
+    get:
+      tags: [Skills]
+      summary: Get skill by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Skills]
+      summary: Update skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Skills]
+      summary: Partially update skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Skills]
+      summary: Delete skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/user-skills:
+    get:
+      tags: [User Skills]
+      summary: List user skills
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+        - name: skill_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [User Skills]
+      summary: Create user skill
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSkillInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/user-skills/{id}:
+    get:
+      tags: [User Skills]
+      summary: Get user skill by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [User Skills]
+      summary: Update user skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSkillInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [User Skills]
+      summary: Partially update user skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSkillInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [User Skills]
+      summary: Delete user skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/projects:
+    get:
+      tags: [Projects]
+      summary: List projects
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Projects]
+      summary: Create project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/projects/{id}:
+    get:
+      tags: [Projects]
+      summary: Get project by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Projects]
+      summary: Update project
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Projects]
+      summary: Partially update project
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Projects]
+      summary: Delete project
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/project-skills:
+    get:
+      tags: [Project Skills]
+      summary: List project skills
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: project_id
+          in: query
+          schema: { type: integer }
+        - name: skill_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Project Skills]
+      summary: Create project skill
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectSkillInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/project-skills/{id}:
+    get:
+      tags: [Project Skills]
+      summary: Get project skill by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Project Skills]
+      summary: Update project skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectSkillInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Project Skills]
+      summary: Partially update project skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectSkillInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Project Skills]
+      summary: Delete project skill
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/blog-posts:
+    get:
+      tags: [Blog Posts]
+      summary: List blog posts
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Blog Posts]
+      summary: Create blog post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogPostInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/blog-posts/{id}:
+    get:
+      tags: [Blog Posts]
+      summary: Get blog post by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Blog Posts]
+      summary: Update blog post
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogPostInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Blog Posts]
+      summary: Partially update blog post
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlogPostInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Blog Posts]
+      summary: Delete blog post
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/tags:
+    get:
+      tags: [Tags]
+      summary: List tags
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Tags]
+      summary: Create tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/tags/{id}:
+    get:
+      tags: [Tags]
+      summary: Get tag by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Tags]
+      summary: Update tag
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Tags]
+      summary: Partially update tag
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Tags]
+      summary: Delete tag
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/post-tags:
+    get:
+      tags: [Post Tags]
+      summary: List post tags
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: blog_post_id
+          in: query
+          schema: { type: integer }
+        - name: tag_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Post Tags]
+      summary: Create post tag
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostTagInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/post-tags/{id}:
+    get:
+      tags: [Post Tags]
+      summary: Get post tag by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Post Tags]
+      summary: Update post tag
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostTagInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Post Tags]
+      summary: Partially update post tag
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostTagInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Post Tags]
+      summary: Delete post tag
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/certifications:
+    get:
+      tags: [Certifications]
+      summary: List certifications
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+    post:
+      tags: [Certifications]
+      summary: Create certification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificationInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/certifications/{id}:
+    get:
+      tags: [Certifications]
+      summary: Get certification by ID
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Certifications]
+      summary: Update certification
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificationInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Certifications]
+      summary: Partially update certification
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificationInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Certifications]
+      summary: Delete certification
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/contact-messages:
+    get:
+      tags: [Contact Messages]
+      summary: List contact messages
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+        - name: user_id
+          in: query
+          schema: { type: integer }
+        - name: is_read
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200': { $ref: '#/components/responses/SuccessPaginated' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Contact Messages]
+      summary: Create contact message
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageInput'
+      responses:
+        '201': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/contact-messages/{id}:
+    get:
+      tags: [Contact Messages]
+      summary: Get contact message by ID
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Contact Messages]
+      summary: Update contact message
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    patch:
+      tags: [Contact Messages]
+      summary: Partially update contact message
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageInput'
+      responses:
+        '200': { $ref: '#/components/responses/SuccessData' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      tags: [Contact Messages]
+      summary: Delete contact message
+      security: [{ bearerAuth: [] }]
+      parameters: [ { $ref: '#/components/parameters/IdPath' } ]
+      responses:
+        '200': { $ref: '#/components/responses/SuccessMessage' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: API Token
+      description: API token from `php artisan make:token`
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+      description: Resource ID
+
+  responses:
+    SuccessData:
+      description: Success with single resource
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiResponse' }
+    SuccessMessage:
+      description: Success with no data (e.g. delete)
+      content:
+        application/json:
+          schema:
+            allOf:
+              - { $ref: '#/components/schemas/ApiResponse' }
+              - type: object
+                properties:
+                  data: { nullable: true }
+    SuccessPaginated:
+      description: Success with paginated list
+      content:
+        application/json:
+          schema:
+            allOf:
+              - { $ref: '#/components/schemas/ApiResponse' }
+              - type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      current_page: { type: integer }
+                      data: { type: array }
+                      first_page_url: { type: string }
+                      from: { type: integer, nullable: true }
+                      last_page: { type: integer }
+                      last_page_url: { type: string }
+                      links: { type: array }
+                      next_page_url: { type: string, nullable: true }
+                      path: { type: string }
+                      per_page: { type: integer }
+                      prev_page_url: { type: string, nullable: true }
+                      to: { type: integer, nullable: true }
+                      total: { type: integer }
+    ValidationError:
+      description: Validation failed (422)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    NotFound:
+      description: Resource not found (404)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    Unauthorized:
+      description: Unauthorized - missing or invalid token (401)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    TooManyRequests:
+      description: Rate limit exceeded (429)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    ServerError:
+      description: Internal server error (500)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        data: {}
+        message: { type: string }
+        errors: { type: 'object', nullable: true }
+    ApiError:
+      type: object
+      properties:
+        data: { type: 'object', nullable: true }
+        message: { type: string }
+        errors: { type: 'object', nullable: true }
+
+    UserInput:
+      type: object
+      properties:
+        full_name: { type: string, maxLength: 255 }
+        headline: { type: string, maxLength: 255, nullable: true }
+        bio: { type: string, nullable: true }
+        email_public: { type: string, format: email, maxLength: 255, nullable: true }
+        location: { type: string, maxLength: 255, nullable: true }
+        profile_image_url: { type: string, format: uri, maxLength: 512, nullable: true }
+      required: [full_name]
+    User:
+      allOf:
+        - { $ref: '#/components/schemas/UserInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    ExperienceInput:
+      type: object
+      properties:
+        user_id: { type: integer }
+        company_name: { type: string, maxLength: 255 }
+        position_title: { type: string, maxLength: 255 }
+        location: { type: string, maxLength: 255, nullable: true }
+        start_date: { type: string, format: date, nullable: true }
+        end_date: { type: string, format: date, nullable: true }
+        is_current: { type: boolean, nullable: true }
+        description: { type: string, nullable: true }
+      required: [user_id, company_name, position_title]
+    Experience:
+      allOf:
+        - { $ref: '#/components/schemas/ExperienceInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    EducationInput:
+      type: object
+      properties:
+        user_id: { type: integer }
+        institution_name: { type: string, maxLength: 255 }
+        degree: { type: string, maxLength: 255 }
+        field_of_study: { type: string, maxLength: 255, nullable: true }
+        location: { type: string, maxLength: 255, nullable: true }
+        start_date: { type: string, format: date, nullable: true }
+        end_date: { type: string, format: date, nullable: true }
+        is_current: { type: boolean, nullable: true }
+        description: { type: string, nullable: true }
+      required: [user_id, institution_name, degree]
+    Education:
+      allOf:
+        - { $ref: '#/components/schemas/EducationInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    SkillCategoryInput:
+      type: object
+      properties:
+        name: { type: string, maxLength: 255 }
+        slug: { type: string, maxLength: 255, nullable: true }
+        description: { type: string, nullable: true }
+      required: [name]
+    SkillCategory:
+      allOf:
+        - { $ref: '#/components/schemas/SkillCategoryInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    SkillInput:
+      type: object
+      properties:
+        skill_category_id: { type: integer }
+        name: { type: string, maxLength: 255 }
+        slug: { type: string, maxLength: 255, nullable: true }
+        level: { type: string, maxLength: 255, nullable: true }
+        description: { type: string, nullable: true }
+      required: [skill_category_id, name]
+    Skill:
+      allOf:
+        - { $ref: '#/components/schemas/SkillInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    UserSkillInput:
+      type: object
+      properties:
+        user_id: { type: integer }
+        skill_id: { type: integer }
+        proficiency_level: { type: string, maxLength: 255, nullable: true }
+        years_experience: { type: integer, nullable: true }
+        is_primary: { type: boolean, nullable: true }
+      required: [user_id, skill_id]
+    UserSkill:
+      allOf:
+        - { $ref: '#/components/schemas/UserSkillInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    ProjectInput:
+      type: object
+      properties:
+        user_id: { type: integer }
+        title: { type: string, maxLength: 255 }
+        slug: { type: string, maxLength: 255, nullable: true }
+        summary: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        url: { type: string, format: uri, maxLength: 512, nullable: true }
+        repository_url: { type: string, format: uri, maxLength: 512, nullable: true }
+        start_date: { type: string, format: date, nullable: true }
+        end_date: { type: string, format: date, nullable: true }
+        is_active: { type: boolean, nullable: true }
+        is_featured: { type: boolean, nullable: true }
+      required: [user_id, title]
+    Project:
+      allOf:
+        - { $ref: '#/components/schemas/ProjectInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    ProjectSkillInput:
+      type: object
+      properties:
+        project_id: { type: integer }
+        skill_id: { type: integer }
+      required: [project_id, skill_id]
+    ProjectSkill:
+      allOf:
+        - { $ref: '#/components/schemas/ProjectSkillInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    BlogPostInput:
+      type: object
+      properties:
+        user_id: { type: integer }
+        title: { type: string, maxLength: 255 }
+        slug: { type: string, maxLength: 255, nullable: true }
+        excerpt: { type: string, nullable: true }
+        content: { type: string, nullable: true }
+        published_at: { type: string, format: date-time, nullable: true }
+        is_published: { type: boolean, nullable: true }
+      required: [user_id, title]
+    BlogPost:
+      allOf:
+        - { $ref: '#/components/schemas/BlogPostInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    TagInput:
+      type: object
+      properties:
+        name: { type: string, maxLength: 255 }
+        slug: { type: string, maxLength: 255, nullable: true }
+        description: { type: string, nullable: true }
+      required: [name]
+    Tag:
+      allOf:
+        - { $ref: '#/components/schemas/TagInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    PostTagInput:
+      type: object
+      properties:
+        blog_post_id: { type: integer }
+        tag_id: { type: integer }
+      required: [blog_post_id, tag_id]
+    PostTag:
+      allOf:
+        - { $ref: '#/components/schemas/PostTagInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    CertificationInput:
+      type: object
+      properties:
+        user_id: { type: integer }
+        name: { type: string, maxLength: 255 }
+        issuer: { type: string, maxLength: 255, nullable: true }
+        issue_date: { type: string, format: date, nullable: true }
+        expiration_date: { type: string, format: date, nullable: true }
+        credential_id: { type: string, maxLength: 255, nullable: true }
+        credential_url: { type: string, format: uri, maxLength: 512, nullable: true }
+        description: { type: string, nullable: true }
+      required: [user_id, name]
+    Certification:
+      allOf:
+        - { $ref: '#/components/schemas/CertificationInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
+
+    ContactMessageInput:
+      type: object
+      properties:
+        user_id: { type: integer }
+        name: { type: string, maxLength: 255 }
+        email: { type: string, format: email, maxLength: 255 }
+        subject: { type: string, maxLength: 255 }
+        message: { type: string }
+        is_read: { type: boolean, nullable: true }
+      required: [user_id, name, email, subject, message]
+    ContactMessage:
+      allOf:
+        - { $ref: '#/components/schemas/ContactMessageInput' }
+        - type: object
+          properties:
+            id: { type: integer }
+            created_at: { type: string, format: date-time }
+            updated_at: { type: string, format: date-time }
