@@ -54,6 +54,9 @@ Dokumentasi menyeluruh ada di folder **docs/**; indeks lengkap: [docs/README.md]
 - [docs/PERANCANGAN_ADMIN.md](docs/PERANCANGAN_ADMIN.md) — Fitur admin: login, current user, relasi nama, menu dropdown.
 - [docs/PUBLIKASI_WEB.md](docs/PUBLIKASI_WEB.md) — Perilaku API untuk publik vs admin (blog-posts, projects).
 - [docs/AUDIT_REPORT_ISO27001.md](docs/AUDIT_REPORT_ISO27001.md) — Laporan audit keamanan (API & admin).
+- [docs/RINGKASAN_RANCANGAN.md](docs/RINGKASAN_RANCANGAN.md) — Ringkasan rancangan proyek dan tautan ke dokumen terkait.
+- [docs/DIAGRAM_DAN_ERD.md](docs/DIAGRAM_DAN_ERD.md) — Diagram arsitektur, ERD database, dan alur (Mermaid).
+- [docs/PANDUAN_DOKUMENTASI_RPL.md](docs/PANDUAN_DOKUMENTASI_RPL.md) — Panduan struktur dokumen RPL/SDLC dan peta dokumen proyek ke tahap SDLC.
 - [DEPLOY.md](DEPLOY.md) — Deploy stack dengan Podman/Docker Compose.
 
 ## Subproyek

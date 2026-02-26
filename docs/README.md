@@ -30,6 +30,24 @@ Laporan audit keamanan informasi (API & admin) mengacu kontrol Annex A ISO/IEC 2
 
 ---
 
+### [RINGKASAN_RANCANGAN.md](RINGKASAN_RANCANGAN.md)
+
+Ringkasan rancangan (plan) yang telah dibuat untuk proyek: dokumentasi menyeluruh, perancangan admin, publikasi web, perbaikan review admin, admin bergaya CMS, serta rancangan lain (UI/UX, API, auth, deploy). Menghubungkan setiap rancangan dengan status implementasi dan dokumen terkait. Berguna untuk **tech lead** dan **developer** yang ingin konteks rencana pengembangan.
+
+---
+
+### [DIAGRAM_DAN_ERD.md](DIAGRAM_DAN_ERD.md)
+
+Diagram dan ERD: (1) arsitektur stack (klien–API–DB), (2) Entity Relationship Diagram database (users, experiences, educations, projects, blog_posts, skills, tags, pivot tables, dll.), (3) alur publikasi (publik vs admin), (4) alur admin login dan auto-fill, (5) alur deploy container. Semua dalam format Mermaid. Berguna untuk **developer** dan **tech lead** yang perlu gambaran visual model data dan alur sistem.
+
+---
+
+### [PANDUAN_DOKUMENTASI_RPL.md](PANDUAN_DOKUMENTASI_RPL.md)
+
+Panduan dokumentasi RPL/SDLC: tahap Analisis Kebutuhan (BRD, SRS, User Story, MoSCoW), Perancangan (SDD, ERD, UML, API), Implementasi (README, Changelog), Pengujian (Test Plan, UAT), Deployment & Maintenance (Deployment Guide, User Manual). Memetakan dokumen proyek ke tiap tahap SDLC dan mencatat celah/rekomendasi. Berguna untuk **mahasiswa RPL**, **tech lead**, dan **QA** yang ingin struktur dokumen mengacu standar SDLC.
+
+---
+
 ## Dokumen di luar folder docs/
 
 | Dokumen | Lokasi | Isi | Untuk siapa |
@@ -48,4 +66,7 @@ Laporan audit keamanan informasi (API & admin) mengacu kontrol Annex A ISO/IEC 2
 - Ingin **detail fitur admin** → baca [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md).
 - Ingin **publik vs admin API** → baca [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md).
 - Ingin **audit keamanan** → baca [AUDIT_REPORT_ISO27001.md](AUDIT_REPORT_ISO27001.md).
+- Ingin **ringkasan rancangan/plan** → baca [RINGKASAN_RANCANGAN.md](RINGKASAN_RANCANGAN.md).
+- Ingin **diagram dan ERD** → baca [DIAGRAM_DAN_ERD.md](DIAGRAM_DAN_ERD.md).
+- Ingin **panduan dokumentasi RPL/SDLC** → baca [PANDUAN_DOKUMENTASI_RPL.md](PANDUAN_DOKUMENTASI_RPL.md).
 - Ingin **jalankan / deploy** → [README.md](../README.md) dan [DEPLOY.md](../DEPLOY.md); setup per app di README masing-masing subproyek.
