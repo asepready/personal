@@ -4,8 +4,24 @@ import { getList, getOne, create, update, remove } from '../api'
 import { getCurrentUser } from '../auth'
 import { resourceConfigs } from '../resourceConfig'
 import MarkdownEditor from '../components/MarkdownEditor'
+import DataTable from '../components/ui/DataTable'
+import FormBadge from '../components/ui/FormBadge'
+import RelationalSelect from '../components/ui/RelationalSelect'
 
 const PER_PAGE = 15
+
+function slugify(text) {
+  if (typeof text !== 'string' || !text.trim()) return ''
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+const POST_AS_CURRENT_USER_RESOURCES = ['blog-posts', 'projects']
 
 export default function ResourcePage({ config }) {
   const [searchParams] = useSearchParams()
@@ -31,6 +47,7 @@ export default function ResourcePage({ config }) {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [filterOptions, setFilterOptions] = useState({})
   const [formFieldOptions, setFormFieldOptions] = useState({})
+  const [slugDirty, setSlugDirty] = useState(false)
 
   useEffect(() => {
     if (!toast) return
@@ -137,6 +154,7 @@ export default function ResourcePage({ config }) {
 
   const openCreate = () => {
     setEditing(null)
+    setSlugDirty(false)
     const currentUser = getCurrentUser()
     const initial = {}
     cfg.formFields.forEach((f) => {
@@ -151,6 +169,7 @@ export default function ResourcePage({ config }) {
 
   const openEdit = async (id) => {
     setFormErrors({})
+    setSlugDirty(false)
     try {
       const res = await getOne(cfg.endpoint, id)
       const data = res?.data ?? res
@@ -176,6 +195,35 @@ export default function ResourcePage({ config }) {
     }
   }
 
+  const openDuplicate = async (id) => {
+    setFormErrors({})
+    setSlugDirty(false)
+    try {
+      const res = await getOne(cfg.endpoint, id)
+      const data = res?.data ?? res
+      const values = {}
+      cfg.formFields.forEach((f) => {
+        let v = data[f.key]
+        if (f.key === 'id') return
+        if (f.type === 'checkbox') v = Boolean(v)
+        if (f.type === 'date' && v) v = v.slice(0, 10)
+        if (f.type === 'datetime-local' && v) v = v.slice(0, 16)
+        values[f.key] = v ?? ''
+      })
+      if (config.path === 'contact-messages') {
+        values.name = data.name ?? ''
+        values.email = data.email ?? ''
+        values.subject = data.subject ?? ''
+        values.message = data.message ?? ''
+      }
+      setFormData(values)
+      setEditing(null)
+      setFormOpen(true)
+    } catch (e) {
+      setToast({ type: 'error', text: e.message || 'Gagal memuat data.' })
+    }
+  }
+
   const closeForm = () => {
     setFormOpen(false)
     setEditing(null)
@@ -188,7 +236,9 @@ export default function ResourcePage({ config }) {
     setFormErrors({})
     setSubmitLoading(true)
     const body = {}
+    const currentUser = getCurrentUser()
     cfg.formFields.forEach((f) => {
+      if (POST_AS_CURRENT_USER_RESOURCES.includes(config.path) && f.key === 'user_id') return
       let v = formData[f.key]
       if (f.type === 'checkbox') v = v ? 1 : 0
       if (v === '' || v == null) {
@@ -197,6 +247,8 @@ export default function ResourcePage({ config }) {
       }
       body[f.key] = v
     })
+    if (POST_AS_CURRENT_USER_RESOURCES.includes(config.path) && currentUser?.id)
+      body.user_id = currentUser.id
     try {
       if (editing) {
         await update(cfg.endpoint, editing, body)
@@ -230,8 +282,18 @@ export default function ResourcePage({ config }) {
   }
 
   const setField = (key, value) => {
-    setFormData((d) => ({ ...d, [key]: value }))
+    setFormData((d) => {
+      const next = { ...d, [key]: value }
+      if ((key === 'title') && (config.path === 'blog-posts' || config.path === 'projects') && !slugDirty && 'slug' in d)
+        next.slug = slugify(value)
+      return next
+    })
     setFormErrors((e) => ({ ...e, [key]: null }))
+  }
+
+  const setFieldSlugDirty = (key, value) => {
+    if (key === 'slug') setSlugDirty(true)
+    setField(key, value)
   }
 
   const setFilterValue = (key, value) => {
@@ -313,66 +375,28 @@ export default function ResourcePage({ config }) {
         </div>
       )}
 
-      {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem 0' }}>
-          <span className="loading-spinner" aria-hidden="true" />
-          <span style={{ color: 'var(--color-text-muted)' }}>Memuat...</span>
-        </div>
-      ) : (
-        <>
-          <div style={{ overflowX: 'auto' }}>
-            <table>
-              <thead>
-                <tr>
-                  {cfg.listColumns.map((c) => (
-                    <th key={c.key}>{c.label}</th>
-                  ))}
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((row) => {
-                  const previewUrl = cfg.previewBaseUrl && cfg.previewSlugField && row[cfg.previewSlugField]
-                    ? `${(cfg.previewBaseUrl || '').replace(/\/$/, '')}${cfg.previewPathPrefix || '/blog/'}${row[cfg.previewSlugField]}`
-                    : null
-                  return (
-                    <tr key={row.id}>
-                      {cfg.listColumns.map((c) => {
-                        const displayRelation = c.displayRelation
-                        const cellValue = displayRelation
-                          ? (row[displayRelation.key]?.[displayRelation.labelKey] ?? row[c.key] ?? '')
-                          : (c.key === 'is_published'
-                            ? (row[c.key] ? 'Published' : 'Draft')
-                            : c.key === 'is_read' || c.key === 'is_featured' || c.key === 'is_current' || c.key === 'is_active' || c.key === 'is_primary'
-                              ? (row[c.key] ? 'Ya' : 'Tidak')
-                              : row[c.key])
-                        return <td key={c.key}>{String(cellValue ?? '')}</td>
-                      })}
-                      <td>
-                        <button type="button" className="btn btn-sm btn-secondary" style={{ marginRight: '0.5rem' }} onClick={() => openEdit(row.id)}>Edit</button>
-                        {previewUrl && (
-                          <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-secondary" style={{ marginRight: '0.5rem' }}>Preview</a>
-                        )}
-                        {!cfg.createDisabled && (
-                          <button type="button" className="btn btn-sm btn-danger" onClick={() => openDeleteConfirm(row.id)}>Hapus</button>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-          {items.length === 0 && <p style={{ color: 'var(--color-text-muted)' }}>Belum ada data.</p>}
-          {totalPages > 1 && (
-            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <button className="btn btn-secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Sebelumnya</button>
-              <span style={{ fontSize: '0.875rem' }}>Halaman {page} dari {totalPages}</span>
-              <button className="btn btn-secondary" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>Selanjutnya</button>
-            </div>
-          )}
-        </>
-      )}
+      <DataTable
+        columns={cfg.listColumns}
+        data={items}
+        getPreviewUrl={
+          cfg.previewBaseUrl && cfg.previewSlugField
+            ? (row) => {
+                const slug = row[cfg.previewSlugField]
+                return slug
+                  ? `${(cfg.previewBaseUrl || '').replace(/\/$/, '')}${cfg.previewPathPrefix || '/blog/'}${slug}`
+                  : null
+              }
+            : undefined
+        }
+        onEdit={openEdit}
+        onDuplicate={openDuplicate}
+        onDelete={openDeleteConfirm}
+        createDisabled={cfg.createDisabled}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        loading={loading}
+      />
 
       {deleteConfirmId != null && (
         <div style={modalStyles.overlay} onClick={closeDeleteConfirm} role="dialog" aria-modal="true" aria-labelledby="confirm-delete-title">
@@ -391,6 +415,9 @@ export default function ResourcePage({ config }) {
         <div style={modalStyles.overlay} onClick={closeForm} role="dialog" aria-modal="true">
           <div style={config.path === 'blog-posts' ? { ...modalStyles.box, maxWidth: 900, width: '95%', minHeight: '85vh' } : modalStyles.box} onClick={(e) => e.stopPropagation()}>
             <h3 style={{ margin: '0 0 1rem' }}>{editing ? 'Edit' : 'Tambah'}</h3>
+            {POST_AS_CURRENT_USER_RESOURCES.includes(config.path) && (
+              <FormBadge userName={getCurrentUser()?.full_name} />
+            )}
             {config.path === 'contact-messages' && editing && (
               <div style={readOnlyBlockStyles}>
                 <div style={{ marginBottom: '0.5rem' }}><strong>Nama:</strong> {formData.name ?? ''}</div>
@@ -401,7 +428,9 @@ export default function ResourcePage({ config }) {
               </div>
             )}
             <form onSubmit={handleSubmit}>
-              {cfg.formFields.map((f) => (
+              {cfg.formFields.map((f) => {
+                if (POST_AS_CURRENT_USER_RESOURCES.includes(config.path) && f.key === 'user_id') return null
+                return (
                 <div key={f.key} style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
                     {f.label} {f.required && '*'}
@@ -432,7 +461,9 @@ export default function ResourcePage({ config }) {
                     <input
                       type={f.type}
                       value={formData[f.key] ?? ''}
-                      onChange={(e) => setField(f.key, f.type === 'number' ? e.target.valueAsNumber : e.target.value)}
+                      onChange={(e) => (f.key === 'slug' && (config.path === 'blog-posts' || config.path === 'projects')
+                        ? setFieldSlugDirty(f.key, e.target.value)
+                        : setField(f.key, f.type === 'number' ? e.target.valueAsNumber : e.target.value))}
                       required={f.required}
                       placeholder={f.type === 'password' && editing ? 'Kosongkan jika tidak diubah' : undefined}
                     />
@@ -445,23 +476,20 @@ export default function ResourcePage({ config }) {
                     />
                   )}
                   {f.type === 'selectRemote' && (
-                    <select
-                      value={formData[f.key] !== undefined && formData[f.key] !== null ? String(formData[f.key]) : ''}
-                      onChange={(e) => setField(f.key, e.target.value === '' ? '' : (f.optionValue === 'id' ? parseInt(e.target.value, 10) : e.target.value))}
+                    <RelationalSelect
+                      options={formFieldOptions[f.key] || []}
+                      value={formData[f.key]}
+                      onChange={(v) => setField(f.key, v === '' ? '' : (f.optionValue === 'id' ? Number(v) : v))}
+                      placeholder="-- Pilih --"
+                      isDisabled={formFieldOptions[f.key] === undefined}
                       required={f.required}
-                      disabled={formFieldOptions[f.key] === undefined}
-                    >
-                      <option value="">-- Pilih --</option>
-                      {(formFieldOptions[f.key] || []).map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
+                    />
                   )}
                   {formErrors[f.key] && (
                     <span style={{ fontSize: '0.8125rem', color: 'var(--color-danger)' }}>{formErrors[f.key][0]}</span>
                   )}
                 </div>
-              ))}
+              )})}
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
                 <button type="submit" className="btn btn-primary" disabled={submitLoading}>
                   {submitLoading ? 'Menyimpan...' : 'Simpan'}

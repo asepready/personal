@@ -40,29 +40,45 @@ export default function Home() {
 
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
-      <section style={styles.hero}>
-        <div style={styles.heroContent}>
-          {user?.profile_image_url && (
-            <img
-              src={user.profile_image_url}
-              alt=""
-              style={styles.avatar}
-            />
+      <section className="home-hero">
+        <div className="home-hero-left">
+          <p className="fade-in-up" style={styles.kicker}>Hi, I&apos;m</p>
+          <h1 className="fade-in-up delay-1" style={styles.heroTitle}>
+            {user?.full_name || 'Portfolio'}
+          </h1>
+          <p className="fade-in-up delay-2" style={styles.heroHeadline}>
+            {user?.headline || 'Membangun solusi web yang skalabel dengan React & PHP.'}
+          </p>
+          {user?.bio && (
+            <p className="fade-in-up delay-3" style={styles.heroBody}>
+              {user.bio}
+            </p>
           )}
-          <h1 style={styles.heroTitle}>{user?.full_name || 'Portfolio'}</h1>
-          <p style={styles.heroHeadline}>{user?.headline || 'Ahli Infrastruktur Jaringan & Administrasi Sistem.'}</p>
-          <div style={styles.cta}>
-            <Link to="/proyek" className="btn btn-primary">Lihat Proyek</Link>
+          <div className="fade-in-up delay-3" style={styles.cta}>
+            <Link to="/proyek" className="btn btn-primary">Lihat Portofolio</Link>
             <Link to="/kontak" className="btn btn-outline">Hubungi Saya</Link>
           </div>
+        </div>
+        <div className="home-hero-right">
+          {user?.profile_image_url && (
+            <div className="home-hero-photo-wrapper fade-in-up delay-2">
+              <div className="home-hero-blob" aria-hidden="true" />
+              <img
+                src={user.profile_image_url}
+                alt={user.full_name || 'Foto profil'}
+                loading="lazy"
+                className="home-hero-avatar"
+              />
+            </div>
+          )}
         </div>
       </section>
 
       {user?.bio && (
         <section style={styles.section}>
-          <h2 className="section-title">Tentang</h2>
+          <h2 className="section-title">Tentang Saya</h2>
           <p style={styles.bio}>{user.bio}</p>
-          <Link to="/tentang">Selengkapnya →</Link>
+          <Link to="/tentang">Baca lebih lengkap →</Link>
         </section>
       )}
 
@@ -77,7 +93,7 @@ export default function Home() {
               </Link>
             ))}
           </div>
-          <Link to="/proyek" style={{ marginTop: '1rem', display: 'inline-block' }}>Semua proyek →</Link>
+          <Link to="/proyek" style={{ marginTop: '1rem', display: 'inline-block' }}>Lihat semua proyek →</Link>
         </section>
       )}
     </div>
@@ -85,11 +101,10 @@ export default function Home() {
 }
 
 const styles = {
-  hero: { textAlign: 'center', padding: '2rem 0' },
-  heroContent: { maxWidth: 600, margin: '0 auto' },
-  avatar: { width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' },
-  heroTitle: { fontSize: '2.25rem', fontWeight: 700, margin: '0 0 0.5rem' },
-  heroHeadline: { fontSize: '1.125rem', color: 'var(--color-text-muted)', margin: '0 0 1.5rem' },
+  kicker: { margin: 0, fontSize: '0.9375rem', color: 'var(--color-primary)', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' },
+  heroTitle: { fontSize: '2.5rem', fontWeight: 700, margin: '0.35rem 0 0.5rem' },
+  heroHeadline: { fontSize: '1.125rem', color: 'var(--color-text-muted)', margin: '0 0 0.75rem' },
+  heroBody: { margin: '0 0 1.5rem', maxWidth: 520 },
   cta: { display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' },
   section: { marginTop: '3rem' },
   bio: { color: 'var(--color-text-muted)', marginBottom: '0.5rem' },

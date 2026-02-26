@@ -2,29 +2,30 @@
 
 Dokumen ini merangkum rancangan (plan) yang telah dibuat untuk proyek portfolio, beserta status implementasi yang relevan.
 
+**Perubahan kode dan dokumentasi terbaru** dicatat di [CHANGELOG.md](CHANGELOG.md).
+
 ---
 
 ## Rancangan utama (yang tercakup dalam dokumentasi)
 
 | Rancangan | Ringkasan | Status / dokumen |
 |-----------|-----------|-------------------|
-| **Dokumentasi menyeluruh** | Indeks dokumentasi di `docs/`, arsitektur stack, perilaku publikasi (publik vs admin), pembaruan README root. | Implementasi: [SRS-PORTFOLIO.md](SRS-PORTFOLIO.md), [README.md](README.md) (indeks), [ARSITEKTUR.md](ARSITEKTUR.md), [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md). |
-| **Perancangan admin** | Login & current user, auto-fill user_id, form/list relasi dengan nama (bukan ID), menu sidebar dropdown per kelompok (terbuka saat halaman aktif). | Implementasi didokumentasikan di [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md). |
-| **Publikasi ke web** | Request tanpa token hanya mendapat blog posts dan projects dengan `is_published = true`; admin dengan token melihat semua (termasuk draft). Dukungan is_published untuk Projects di API dan admin. | Implementasi di API (BlogPostController, ProjectController) dan admin (resourceConfig projects); perilaku di [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md). |
-| **Perbaikan review admin** | (1) Dashboard: link Edit post terbaru membuka modal edit via `?edit=id`. (2) Contact messages: tampil body pesan (nama, email, subjek, pesan) read-only di form. (3) Filter: select dari API (users, skills, blog-posts, dll.). (4) Users: field username dan password di form dengan dukungan API. | Implementasi tersebar di ResourcePage, resourceConfig, Dashboard, UserController. |
-| **Admin bergaya CMS** | Menu berkelompok, dashboard berorientasi konten (post terbaru, draft/published), workflow Draft/Published di list, preview post, (opsional) media library. | Sebagian tumpang tindih dengan fitur yang sudah ada (menu dropdown, preview di resourceConfig blog-posts); pengembangan lanjutan (dashboard CMS, media) dapat mengacu rancangan ini. |
+| **Dokumentasi menyeluruh** | Indeks dokumentasi di `docs/`, arsitektur stack, perilaku publikasi (publik vs admin), pembaruan README root. | [SRS-PORTFOLIO.md](SRS-PORTFOLIO.md), [README.md](README.md), [ARSITEKTUR.md](ARSITEKTUR.md), [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md). |
+| **Rancangan UI/UX Web (publik)** | Konsep "Clean & Content-First Professional": style guide, Hero, Navbar (sticky/glassmorphism), Timeline, Skills (chips), Projects (featured + grid), Blog & reading mode, Sertifikasi & Kontak (floating labels, validasi). Tech: Tailwind, Headless/Radix, Framer Motion, react-hook-form + Zod. | Rancangan: [RANCANGAN_WEB_UI_UX.md](RANCANGAN_WEB_UI_UX.md). Implementasi mengacu struktur komponen dan checklist NFR-12, FR-34, FR-35, NFR-01. |
+| **Rancangan UI/UX Admin** | Konsep "Clean Data-Driven Dashboard": layout Sidebar + Header + Main, Dashboard (kartu statistik + quick actions), DataTable (TanStack Table, StatusBadge, kebab menu), Form CRUD (FormBadge, RelationalSelect, auto-slug), Messages Inbox dua kolom, dark mode Slate 900/800. | Rancangan: [RANCANGAN_ADMIN_UI_UX.md](RANCANGAN_ADMIN_UI_UX.md). Implementasi: portfolio-admin (AdminLayout, DataTable, MessagesInbox, useAdminSummary, theme). |
+| **Perancangan admin (perilaku)** | Login & current user, auto-fill user_id, form/list relasi dengan nama (bukan ID), menu sidebar dropdown per kelompok (terbuka saat halaman aktif). | [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md). |
+| **Publikasi ke web** | Request tanpa token hanya mendapat blog posts dan projects dengan `is_published = true`; admin dengan token melihat semua (termasuk draft). | API + admin (resourceConfig); [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md). |
+| **Perbaikan review admin** | Dashboard link Edit via `?edit=id`, contact messages read-only di form, filter select dari API, users username/password. | ResourcePage, resourceConfig, Dashboard, UserController. |
 
 ---
 
 ## Rancangan lain (referensi)
 
-Rancangan tambahan yang pernah dibuat (mis. di Cursor Plans) dan dapat dipakai sebagai acuan pengembangan:
-
-- **UI/UX:** tema dark/light, UI/UX admin, UI/UX portfolio web.
-- **API & audit:** review API, audit ISO 27001 (hasil: [AUDIT_REPORT_ISO27001.md](AUDIT_REPORT_ISO27001.md)).
-- **Auth:** login admin username/password, fitur auth.
-- **Deploy:** deploy ke Podman (hasil: [DEPLOY.md](../DEPLOY.md)), panduan Podman/K8s.
-- **Lain:** form post admin, perbaikan portfolio API, filter/retry/responsif admin, rapikan struktur proyek.
+- **UI/UX:** Rancangan lengkap web publik di [RANCANGAN_WEB_UI_UX.md](RANCANGAN_WEB_UI_UX.md), admin di [RANCANGAN_ADMIN_UI_UX.md](RANCANGAN_ADMIN_UI_UX.md); tema dark/light di kedua aplikasi.
+- **API & audit:** review API, audit ISO 27001 → [AUDIT_REPORT_ISO27001.md](AUDIT_REPORT_ISO27001.md).
+- **Auth:** login admin username/password didokumentasikan di [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md).
+- **Deploy:** Podman/Docker Compose → [DEPLOY.md](../DEPLOY.md).
+- **Lain:** filter/retry/responsif admin, rapikan struktur proyek.
 
 ---
 

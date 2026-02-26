@@ -2,6 +2,8 @@
 
 Dokumen ini mendeskripsikan perancangan dan implementasi fitur Admin portfolio yang telah dikerjakan: konteks user login, tampilan relasi dengan nama (bukan ID), dan navigasi sidebar berbasis dropdown.
 
+**Lihat juga:** [RANCANGAN_ADMIN_UI_UX.md](RANCANGAN_ADMIN_UI_UX.md) untuk rancangan UI/UX lengkap panel admin (layout, Dashboard, DataTable, Form CRUD, Messages Inbox, dark mode).
+
 ---
 
 ## 1. Ringkasan

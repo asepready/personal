@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
         }
 
         $user = User::create([
-            'full_name' => 'Budi Santoso',
+            'full_name' => 'Asep',
             'headline' => 'Network & System Administrator',
             'bio' => 'Ahli infrastruktur jaringan dan administrasi sistem dengan pengalaman 5+ tahun. Fokus pada perancangan jaringan, maintenance server (Linux/Windows), keamanan, monitoring, dan backup.',
             'email_public' => 'netadmin@example.com',
