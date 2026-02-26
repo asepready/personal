@@ -37,13 +37,19 @@ export default function PostDetail() {
 
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '')
   const tags = post.tags || []
+  const readingTime = estimateReadingTime(post.content || '')
 
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
       <Link to="/blog" style={{ marginBottom: '1rem', display: 'inline-block' }}>← Kembali ke Blog</Link>
       <article style={styles.article}>
         <h1 style={styles.title}>{post.title}</h1>
-        <time style={styles.date}>{formatDate(post.published_at)}</time>
+        <div style={styles.metaRow}>
+          <time style={styles.date}>{formatDate(post.published_at)}</time>
+          {readingTime && (
+            <span style={styles.readingTime}>• {readingTime} min read</span>
+          )}
+        </div>
         {post.excerpt && <p style={styles.excerpt}>{post.excerpt}</p>}
         <MarkdownContent content={post.content || ''} style={styles.content} />
         {tags.length > 0 && (
@@ -59,11 +65,22 @@ export default function PostDetail() {
 }
 
 const styles = {
-  article: { maxWidth: 720 },
+  article: { maxWidth: 720, margin: '0 auto' },
   title: { margin: '0 0 0.5rem', fontSize: '1.75rem' },
-  date: { display: 'block', fontSize: '0.9375rem', color: 'var(--color-text-muted)', marginBottom: '1rem' },
+  metaRow: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' },
+  date: { fontSize: '0.9375rem', color: 'var(--color-text-muted)' },
+  readingTime: { fontSize: '0.9375rem', color: 'var(--color-text-muted)' },
   excerpt: { fontSize: '1.125rem', color: 'var(--color-text-muted)', marginBottom: '1rem' },
   content: { lineHeight: 1.7 },
   tags: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1.5rem' },
   tag: { fontSize: '0.875rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', padding: '0.25rem 0.75rem', borderRadius: 6 },
 }
+
+function estimateReadingTime(content) {
+  if (!content) return null
+  const words = content.trim().split(/\s+/).length
+  if (!words) return null
+  const minutes = Math.max(1, Math.round(words / 200))
+  return minutes
+}
+

@@ -57,6 +57,7 @@ REST API untuk portfolio pribadi: users, experiences, educations, skills, projec
     php -r "echo 'base64:'.base64_encode(random_bytes(32)).PHP_EOL;"
     php artisan migrate
     ```
+    Migration `2026_02_26_200000_change_blog_posts_excerpt_to_text` mengubah kolom `blog_posts.excerpt` menjadi `TEXT` (dari VARCHAR(255)) agar ringkasan panjang tidak error. Validasi di `BlogPostController`: `excerpt` max 65535 karakter, `content` max 16777215 karakter.
 
 6. **(Opsional) Isi data contoh untuk testing**:
     ```bash

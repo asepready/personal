@@ -4,6 +4,7 @@ import AdminLayout from './components/AdminLayout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import ResourcePage from './pages/ResourcePage'
+import MessagesInbox from './pages/MessagesInbox'
 
 const resources = [
   { path: 'users', label: 'Users', endpoint: 'users' },
@@ -33,6 +34,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="messages" element={<MessagesInbox />} />
           {resources.map((r) => (
             <Route key={r.path} path={r.path} element={<ResourcePage config={r} />} />
           ))}

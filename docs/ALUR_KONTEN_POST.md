@@ -87,6 +87,7 @@ Fokus utama ada pada resource `blog-posts`, flag `is_published`, serta bagaimana
    - `openCreate()` mengisi `formData.user_id` dengan `currentUser.id` bila tersedia.
    - Field lain diinisialisasi kosong atau false (untuk checkbox `is_published`).
 4. Admin mengisi judul, slug (opsional), excerpt, dan konten markdown.
+   - Editor konten di admin memakai Markdown dengan **preview live**; blok kode Mermaid (flowchart, sequence, ERD, dll.) di-render sebagai diagram di preview.
    - Jika slug dikosongkan, API akan mengisi otomatis dari title (menggunakan `Str::slug`).
 5. Admin menyimpan form dengan `is_published` **belum dicentang**:
    - `ResourcePage` mengirim body ke endpoint `POST /api/blog-posts` melalui helper `create()`.

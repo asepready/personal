@@ -44,8 +44,8 @@ class BlogPostController extends Controller
             'user_id' => 'required|integer|exists:users,id',
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255|unique:blog_posts,slug',
-            'excerpt' => 'nullable|string|max:1000',
-            'content' => 'required|string',
+            'excerpt' => 'nullable|string|max:65535',
+            'content' => 'required|string|max:16777215',
             'published_at' => 'nullable|date',
             'is_published' => 'nullable|boolean',
         ]);
@@ -73,8 +73,8 @@ class BlogPostController extends Controller
             'user_id' => 'sometimes|integer|exists:users,id',
             'title' => 'sometimes|string|max:255',
             'slug' => 'nullable|string|max:255|unique:blog_posts,slug,' . $id,
-            'excerpt' => 'nullable|string|max:1000',
-            'content' => 'sometimes|string',
+            'excerpt' => 'nullable|string|max:65535',
+            'content' => 'sometimes|string|max:16777215',
             'published_at' => 'nullable|date',
             'is_published' => 'nullable|boolean',
         ]);

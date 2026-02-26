@@ -1,12 +1,24 @@
 # Diagram dan ERD Proyek Portfolio
 
-Dokumen ini memuat diagram arsitektur, Entity Relationship Diagram (ERD) database, dan diagram alur yang dipakai di dokumentasi proyek.
+Dokumen ini memuat **diagram lengkap** untuk proyek portfolio: arsitektur sistem, Entity Relationship Diagram (ERD), diagram urutan (sequence), flowchart, diagram state, dan diagram class. Semua diagram dalam format **Mermaid** agar mudah di-render dan dirawat.
+
+**Daftar isi**
+
+1. [Arsitektur Sistem](#1-arsitektur-sistem)
+2. [Entity Relationship Diagram (ERD)](#2-entity-relationship-diagram-erd)
+3. [Diagram Urutan (Sequence)](#3-diagram-urutan-sequence)
+4. [Flowchart Alur Bisnis](#4-flowchart-alur-bisnis)
+5. [Diagram State](#5-diagram-state)
+6. [Diagram Class (Ringkas)](#6-diagram-class-ringkas)
+7. [Referensi Dokumen](#7-referensi-dokumen)
 
 ---
 
-## 1. Arsitektur stack (alur klien – API)
+## 1. Arsitektur Sistem
 
-Diagram ini menggambarkan siapa mengakses apa: pengunjung lewat web (GET publik), admin lewat panel dengan token.
+### 1.1 Konteks Sistem (Klien – API – Database)
+
+Siapa mengakses apa: pengunjung lewat web (GET publik), admin lewat panel dengan token.
 
 ```mermaid
 flowchart LR
@@ -32,13 +44,53 @@ flowchart LR
   API --> DB
 ```
 
-Detail: [ARSITEKTUR.md](ARSITEKTUR.md).
+### 1.2 Arsitektur Lapisan (Layered)
+
+```mermaid
+flowchart TB
+  subgraph presentation [Lapisan Presentasi]
+    Web[portfolio-web]
+    Admin[portfolio-admin]
+  end
+
+  subgraph api_layer [Lapisan API]
+    API[portfolio-api<br/>REST / Lumen]
+  end
+
+  subgraph data [Lapisan Data]
+    DB[(MySQL/MariaDB)]
+  end
+
+  Web --> API
+  Admin --> API
+  API --> DB
+```
+
+### 1.3 Deploy (Container)
+
+Stack dijalankan dengan Podman/Docker Compose: db → api → web, admin.
+
+```mermaid
+flowchart LR
+  subgraph compose [Compose]
+    DB[(db MariaDB)]
+    API[api Lumen]
+    Web[web React]
+    Admin[admin React]
+  end
+
+  DB --> API
+  API --> Web
+  API --> Admin
+```
+
+Detail: [ARSITEKTUR.md](ARSITEKTUR.md), [../DEPLOY.md](../DEPLOY.md).
 
 ---
 
 ## 2. Entity Relationship Diagram (ERD)
 
-Model data di database (MySQL/MariaDB) yang dipakai oleh portfolio-api. Tabel pivot: `user_skills` (User–Skill), `project_skills` (Project–Skill), `post_tags` (BlogPost–Tag).
+Model data di database (MySQL/MariaDB) yang dipakai oleh portfolio-api. Tabel pivot: `user_skills`, `project_skills`, `post_tags`.
 
 ```mermaid
 erDiagram
@@ -100,6 +152,7 @@ erDiagram
     int user_id FK
     string title
     string slug
+    text excerpt
     text content
     boolean is_published
     datetime published_at
@@ -166,9 +219,92 @@ erDiagram
   }
 ```
 
+Sumber kebenaran relasi: [portfolio-api/app/Models/](../portfolio-api/app/Models/).
+
 ---
 
-## 3. Alur publikasi (publik vs admin)
+## 3. Diagram Urutan (Sequence)
+
+### 3.1 Login Admin
+
+```mermaid
+sequenceDiagram
+  participant Admin as Admin (Browser)
+  participant AdminApp as portfolio-admin
+  participant API as portfolio-api
+  participant DB as Database
+
+  Admin->>AdminApp: Masukkan username & password
+  AdminApp->>API: POST /api/login { username, password }
+  API->>DB: Cek user, verifikasi password
+  DB-->>API: Data user
+  API-->>AdminApp: 200 { token, user }
+  AdminApp->>AdminApp: setToken(), setCurrentUser()
+  AdminApp->>Admin: Redirect / dashboard
+```
+
+### 3.2 Pengunjung Mengirim Form Kontak
+
+```mermaid
+sequenceDiagram
+  participant Visitor as Pengunjung
+  participant Web as portfolio-web
+  participant API as portfolio-api
+  participant DB as Database
+
+  Visitor->>Web: Isi form (name, email, subject, message)
+  Web->>Web: Validasi (client-side)
+  Web->>API: POST /api/contact { name, email, subject, message }
+  Note over API: Rate limit cek
+  API->>DB: INSERT contact_messages
+  DB-->>API: OK
+  API-->>Web: 201 { message }
+  Web-->>Visitor: Tampilkan sukses
+```
+
+### 3.3 Admin Mempublikasikan Blog Post
+
+```mermaid
+sequenceDiagram
+  participant Admin as Admin
+  participant AdminApp as portfolio-admin
+  participant API as portfolio-api
+  participant DB as Database
+
+  Admin->>AdminApp: Edit post, set is_published = true, Simpan
+  AdminApp->>API: PUT /api/blog-posts/{id} + Bearer token
+  API->>API: Verifikasi token
+  API->>DB: UPDATE blog_posts SET is_published=1, published_at=...
+  DB-->>API: OK
+  API-->>AdminApp: 200 { data }
+  AdminApp-->>Admin: Toast sukses, tutup form
+```
+
+### 3.4 Pengunjung Melihat Daftar Blog (Publik)
+
+```mermaid
+sequenceDiagram
+  participant Visitor as Pengunjung
+  participant Web as portfolio-web
+  participant API as portfolio-api
+  participant DB as Database
+
+  Visitor->>Web: Buka /blog
+  Web->>API: GET /api/blog-posts?per_page=10 (tanpa token)
+  API->>API: auth()->check() = false
+  API->>DB: SELECT * WHERE is_published = 1
+  DB-->>API: Rows
+  API-->>Web: 200 { data, total }
+  Web-->>Visitor: Render daftar post
+```
+
+Detail perilaku publik vs admin: [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md), [ALUR_KONTEN_POST.md](ALUR_KONTEN_POST.md).
+
+---
+
+## 4. Flowchart Alur Bisnis
+
+### 4.1 Alur Publikasi (Siapa Melihat Apa)
 
 Request tanpa token hanya mendapat blog posts dan projects yang `is_published = true`; dengan token admin melihat semua.
 
@@ -195,11 +331,7 @@ flowchart LR
   ProjectIndex -->|"semua"| Admin
 ```
 
-Detail: [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md).
-
----
-
-## 4. Alur admin: login dan auto-fill konten
+### 4.2 Alur Admin: Login dan Auto-fill Konten
 
 Setelah login, current user disimpan; saat buka form Tambah, field user_id terisi otomatis.
 
@@ -221,36 +353,181 @@ flowchart LR
 
 Detail: [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md).
 
----
-
-## 5. Alur deploy (container)
-
-Stack dijalankan dengan Podman/Docker Compose: db → api → web, admin.
+### 4.3 Alur Pengunjung (User Flow Situs Publik)
 
 ```mermaid
-flowchart LR
-  subgraph compose [Compose]
-    DB[(db MariaDB)]
-    API[api Lumen]
-    Web[web React]
-    Admin[admin React]
-  end
-
-  DB --> API
-  API --> Web
-  API --> Admin
+flowchart TD
+  A[Pengunjung masuk] --> B[Lihat Hero / Home]
+  B --> C[Scroll: Timeline Pengalaman]
+  C --> D[Klik Lihat Proyek]
+  D --> E[Halaman Proyek - Grid]
+  E --> F[Hover: lihat tech stack]
+  F --> G[Klik Detail Proyek]
+  G --> H[Baca detail]
+  H --> I{Tertarik?}
+  I -->|Ya| J[Scroll ke Footer]
+  J --> K[Klik LinkedIn / Isi Form Kontak]
+  I -->|Lanjut baca| L[Blog / Sertifikasi]
+  L --> J
 ```
 
-Detail: [../DEPLOY.md](../DEPLOY.md).
+### 4.4 Alur Admin CRUD (Contoh: Blog Post)
+
+```mermaid
+flowchart TD
+  A[Admin login] --> B[Dashboard]
+  B --> C[Menu: Blog Posts]
+  C --> D[List dengan filter]
+  D --> E{Tindakan?}
+  E -->|Tambah| F[Form Create - user_id auto]
+  E -->|Kebab: Edit| G[Form Edit]
+  E -->|Kebab: Duplicate| H[Form Create dengan data copy]
+  E -->|Kebab: Hapus| I[Konfirmasi → DELETE]
+  F --> J[Simpan → POST]
+  G --> K[Simpan → PUT]
+  J --> D
+  K --> D
+  I --> D
+```
 
 ---
 
-## Referensi
+## 5. Diagram State
+
+### 5.1 Status Blog Post dan Project (Published / Draft)
+
+```mermaid
+stateDiagram-v2
+  [*] --> Draft: Buat baru
+  Draft --> Published: Admin set is_published = true
+  Published --> Draft: Admin set is_published = false
+  Draft --> [*]: Hapus
+  Published --> [*]: Hapus
+```
+
+- **Draft:** Tidak tampil di situs publik (GET tanpa token → 404 untuk by-id).
+- **Published:** Tampil di daftar dan detail untuk pengunjung.
+
+### 5.2 Status Pesan Kontak (Read / Unread)
+
+```mermaid
+stateDiagram-v2
+  [*] --> Unread: Pesan masuk (POST contact)
+  Unread --> Read: Admin "Mark as Read" / buka detail
+  Read --> Unread: Tidak berlaku (satu arah)
+```
+
+- **Unread:** Ditandai di list (bold/background), badge notifikasi di header admin.
+- **Read:** Setelah admin membuka atau klik "Mark as Read".
+
+---
+
+## 6. Diagram Class (Ringkas)
+
+Ringkasan entitas domain utama dan relasi (berbasis model API/database). Untuk implementasi lengkap lihat model Eloquent di `portfolio-api/app/Models/`.
+
+```mermaid
+classDiagram
+  class User {
+    +int id
+    +string full_name
+    +string headline
+    +string username
+    +string email_public
+    +hasMany experiences
+    +hasMany educations
+    +hasMany projects
+    +hasMany blog_posts
+    +belongsToMany skills
+    +hasMany contact_messages
+  }
+
+  class Experience {
+    +int id
+    +int user_id
+    +string company_name
+    +string position_title
+    +belongsTo user
+  }
+
+  class Education {
+    +int id
+    +int user_id
+    +string institution_name
+    +string degree
+    +belongsTo user
+  }
+
+  class Project {
+    +int id
+    +int user_id
+    +string title
+    +string slug
+    +boolean is_published
+    +belongsTo user
+    +belongsToMany skills
+  }
+
+  class BlogPost {
+    +int id
+    +int user_id
+    +string title
+    +string slug
+    +boolean is_published
+    +belongsTo user
+    +belongsToMany tags
+  }
+
+  class SkillCategory {
+    +int id
+    +string name
+    +hasMany skills
+  }
+
+  class Skill {
+    +int id
+    +int skill_category_id
+    +string name
+    +belongsTo category
+    +belongsToMany users
+    +belongsToMany projects
+  }
+
+  class ContactMessage {
+    +int id
+    +int user_id
+    +string name
+    +string email
+    +boolean is_read
+    +belongsTo user
+  }
+
+  class Tag {
+    +int id
+    +string name
+    +string slug
+  }
+
+  User "1" --> "*" Experience
+  User "1" --> "*" Education
+  User "1" --> "*" Project
+  User "1" --> "*" BlogPost
+  User "1" --> "*" ContactMessage
+  User "*" --> "*" Skill : user_skills
+  Project "*" --> "*" Skill : project_skills
+  BlogPost "*" --> "*" Tag : post_tags
+  SkillCategory "1" --> "*" Skill
+```
+
+---
+
+## 7. Referensi Dokumen
 
 | Dokumen | Isi |
-|---------|-----|
-| [ARSITEKTUR.md](ARSITEKTUR.md) | Arsitektur stack, komponen, akses. |
-| [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md) | Perilaku endpoint blog-posts dan projects. |
-| [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md) | Fitur admin dan alur current user. |
-| [../DEPLOY.md](../DEPLOY.md) | Deploy dengan Podman/Docker. |
-| [../portfolio-api/app/Models/](../portfolio-api/app/Models/) | Model Eloquent (sumber kebenaran relasi). |
+|--------|-----|
+| [ARSITEKTUR.md](ARSITEKTUR.md) | Arsitektur stack, komponen, akses publik vs admin. |
+| [SRS-PORTFOLIO.md](SRS-PORTFOLIO.md) | Kebutuhan fungsional (FR) dan non-fungsional (NFR). |
+| [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md) | Perilaku endpoint blog-posts dan projects (publik vs admin). |
+| [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md) | Fitur admin: login, current user, relasi form/list, menu. |
+| [ALUR_KONTEN_POST.md](ALUR_KONTEN_POST.md) | Alur konten blog dari admin hingga tampil di web. |
+| [../DEPLOY.md](../DEPLOY.md) | Deploy dengan Podman/Docker Compose. |

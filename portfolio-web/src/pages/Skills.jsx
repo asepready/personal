@@ -61,23 +61,37 @@ export default function Skills() {
             <section key={cat.id} style={styles.section}>
               <h2 style={styles.catTitle}>{cat.name}</h2>
               {cat.description && <p style={styles.catDesc}>{cat.description}</p>}
-              <div style={styles.tags}>
-                {(byCategory[cat.id] || []).map((s) => (
-                  <span key={s.id} style={styles.tag}>
-                    {s.name}
-                    {s.userSkill?.proficiency_level && (
-                      <span style={styles.level}> · {s.userSkill.proficiency_level}</span>
-                    )}
-                  </span>
-                ))}
+              <div className="skill-tags">
+                {(byCategory[cat.id] || []).map((s) => {
+                  const level = s.userSkill?.proficiency_level
+                  const title = level ? `Level: ${level}` : undefined
+                  return (
+                    <span
+                      key={s.id}
+                      className="skill-tag"
+                      style={styles.tag}
+                      title={title}
+                    >
+                      {s.name}
+                      {level && (
+                        <span style={styles.level}>· {level}</span>
+                      )}
+                    </span>
+                  )
+                })}
               </div>
             </section>
           ))}
         </div>
       ) : (
-        <div style={styles.tags}>
+        <div className="skill-tags">
           {(skills || []).map((s) => (
-            <span key={s.id} style={styles.tag}>
+            <span
+              key={s.id}
+              className="skill-tag"
+              style={styles.tag}
+              title={s.level ? `Level: ${s.level}` : undefined}
+            >
               {s.name}
               {s.level && <span style={styles.level}> · {s.level}</span>}
             </span>
@@ -94,12 +108,7 @@ const styles = {
   section: {},
   catTitle: { fontSize: '1.125rem', margin: '0 0 0.25rem' },
   catDesc: { fontSize: '0.875rem', color: 'var(--color-text-muted)', margin: '0 0 0.75rem' },
-  tags: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' },
   tag: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 9999,
-    padding: '0.375rem 0.875rem',
     fontSize: '0.875rem',
   },
   level: { color: 'var(--color-text-muted)' },

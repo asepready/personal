@@ -46,10 +46,13 @@ export default function About() {
 
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
-      <h1 className="section-title">Tentang</h1>
+      <h1 className="section-title">Tentang Saya</h1>
+      <p style={styles.intro}>
+        Berikut ringkasan profil, pengalaman kerja, dan pendidikan saya.
+      </p>
       <div style={styles.profile}>
         {u.profile_image_url && (
-          <img src={u.profile_image_url} alt="" style={styles.avatar} />
+          <img src={u.profile_image_url} alt="" style={styles.avatar} loading="lazy" />
         )}
         <div>
           <h2 style={styles.name}>{u.full_name}</h2>
@@ -66,7 +69,7 @@ export default function About() {
 
       {experiences.length > 0 && (
         <section style={styles.section}>
-          <h2 className="section-title">Ringkasan Pengalaman</h2>
+          <h2 className="section-title">Pengalaman Kerja</h2>
           <ul style={styles.timeline}>
             {experiences.map((e) => (
               <li key={e.id} style={styles.timelineItem}>
@@ -83,7 +86,7 @@ export default function About() {
 
       {educations.length > 0 && (
         <section style={styles.section}>
-          <h2 className="section-title">Ringkasan Pendidikan</h2>
+          <h2 className="section-title">Pendidikan</h2>
           <ul style={styles.timeline}>
             {educations.map((e) => (
               <li key={e.id} style={styles.timelineItem}>
@@ -102,6 +105,7 @@ export default function About() {
 }
 
 const styles = {
+  intro: { color: 'var(--color-text-muted)', marginBottom: '1.5rem', maxWidth: 560 },
   profile: { display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap', marginBottom: '2rem' },
   avatar: { width: 160, height: 160, borderRadius: 12, objectFit: 'cover' },
   name: { margin: '0 0 0.25rem', fontSize: '1.5rem' },

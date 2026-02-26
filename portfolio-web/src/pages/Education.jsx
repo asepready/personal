@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getUsers, getEducations } from '../api'
 import Loading from '../components/Loading'
 import ErrorState from '../components/ErrorState'
+import Timeline from '../components/ui/Timeline'
 
 export default function Education() {
   const [items, setItems] = useState([])
@@ -33,44 +34,20 @@ export default function Education() {
   if (error) return <ErrorState message={error} onRetry={() => setRetryKey((k) => k + 1)} />
 
   const formatDate = (d) => (d ? new Date(d).toLocaleDateString('id-ID', { year: 'numeric', month: 'long' }) : '')
+  const timelineItems = (items || []).map((e) => ({
+    id: e.id,
+    title: e.degree,
+    subtitle: e.institution_name,
+    period: `${formatDate(e.start_date)} – ${e.is_current ? 'Sekarang' : formatDate(e.end_date)}`,
+    location: e.location,
+    description: [e.field_of_study, e.description].filter(Boolean).join(' — '),
+  }))
 
   return (
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
       <h1 className="section-title">Pendidikan</h1>
-      <div style={styles.timeline}>
-        {items.map((e) => (
-          <article key={e.id} style={styles.card}>
-            <div style={styles.cardHeader}>
-              <h2 style={styles.title}>{e.degree}</h2>
-              <span style={styles.date}>
-                {formatDate(e.start_date)} – {e.is_current ? 'Sekarang' : formatDate(e.end_date)}
-              </span>
-            </div>
-            <p style={styles.institution}>{e.institution_name}</p>
-            {e.field_of_study && <p style={styles.field}>{e.field_of_study}</p>}
-            {e.location && <p style={styles.location}>{e.location}</p>}
-            {e.description && <p style={styles.desc}>{e.description}</p>}
-          </article>
-        ))}
-      </div>
+      <Timeline items={timelineItems} />
       {items.length === 0 && <p style={{ color: 'var(--color-text-muted)' }}>Belum ada data pendidikan.</p>}
     </div>
   )
-}
-
-const styles = {
-  timeline: { display: 'flex', flexDirection: 'column', gap: '1.25rem' },
-  card: {
-    background: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 12,
-    padding: '1.5rem',
-  },
-  cardHeader: { display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' },
-  title: { margin: 0, fontSize: '1.25rem' },
-  date: { fontSize: '0.875rem', color: 'var(--color-text-muted)' },
-  institution: { margin: '0.5rem 0 0', fontWeight: 600 },
-  field: { margin: '0.25rem 0', fontSize: '0.9375rem' },
-  location: { margin: '0.25rem 0', fontSize: '0.9375rem', color: 'var(--color-text-muted)' },
-  desc: { margin: '0.75rem 0 0', fontSize: '0.9375rem' },
 }

@@ -17,10 +17,18 @@ const nav = [
 export default function Header() {
   const [open, setOpen] = useState(false)
   const [theme, setThemeState] = useState('dark')
+  const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
 
   useEffect(() => {
     setThemeState(getTheme())
+    const handleScroll = () => {
+      if (typeof window === 'undefined') return
+      setScrolled(window.scrollY > 16)
+    }
+    handleScroll()
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   const handleToggleTheme = () => {
@@ -30,14 +38,15 @@ export default function Header() {
   }
 
   return (
-    <header style={styles.header}>
-      <div className="container" style={styles.inner}>
+    <header style={{ ...styles.header, ...(scrolled ? styles.headerScrolled : {}) }}>
+      <div className="container" style={{ ...styles.inner, ...(scrolled ? styles.innerScrolled : {}) }}>
         <Link to="/" style={styles.logo}>Portfolio</Link>
         <nav className={`header-nav ${open ? 'header-nav-open' : ''}`} style={{ ...styles.nav, ...(open ? styles.navOpen : {}) }}>
           {nav.map(({ to, label }) => (
             <Link
               key={to}
               to={to}
+              className="header-nav-link"
               style={{
                 ...styles.navLink,
                 ...(location.pathname === to ? styles.navLinkActive : {}),
@@ -75,11 +84,17 @@ export default function Header() {
 
 const styles = {
   header: {
-    background: 'var(--color-surface)',
+    background: 'rgba(15, 23, 42, 0.9)',
     borderBottom: '1px solid var(--color-border)',
-    position: 'sticky',
+    position: 'fixed',
     top: 0,
+    left: 0,
+    right: 0,
     zIndex: 100,
+    backdropFilter: 'blur(18px)',
+  },
+  headerScrolled: {
+    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.7)',
   },
   inner: {
     display: 'flex',
@@ -88,6 +103,10 @@ const styles = {
     paddingTop: '0.75rem',
     paddingBottom: '0.75rem',
     position: 'relative',
+  },
+  innerScrolled: {
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
   },
   logo: {
     fontWeight: 700,

@@ -6,9 +6,15 @@ Daftar dokumen di folder `docs/` dan dokumen penting di luar folder, beserta rin
 
 ## Dokumen di folder docs/
 
+### [CHANGELOG.md](CHANGELOG.md)
+
+**Catatan perubahan proyek**: perubahan penting pada API, admin, dan dokumentasi (migration, fitur editor Mermaid, pembaruan diagram & SRS). Berguna untuk **developer** dan **tech lead** yang ingin melacak perubahan terbaru.
+
+---
+
 ### [SRS-PORTFOLIO.md](SRS-PORTFOLIO.md)
 
-Spesifikasi kebutuhan perangkat lunak untuk aplikasi web portfolio (kebutuhan fungsional, non-fungsional, batasan, dan antarmuka). Berperan sebagai **Product Vision & Product Backlog awal** sekaligus Bab 1–2 laporan RPL. Berguna untuk **stakeholder**, **dosen/penguji**, **tech lead**, dan **developer**.
+**Spesifikasi kebutuhan perangkat lunak** untuk aplikasi web portfolio: kebutuhan fungsional (FR), non-fungsional (NFR), batasan, dan antarmuka. Dokumen dirapikan dengan **daftar isi**, **tabel ringkasan FR/NFR** untuk referensi cepat, dan format heading konsisten. Berperan sebagai **Product Vision & Backlog** dan dasar perancangan/implementasi/pengujian. Berguna untuk **stakeholder**, **tech lead**, dan **developer**.
 
 ---
 
@@ -20,19 +26,31 @@ Ringkasan rancangan dan rencana pengembangan (backlog fitur utama) yang menghubu
 
 ### [ARSITEKTUR.md](ARSITEKTUR.md)
 
-Gambaran stack (portfolio-api, portfolio-admin, portfolio-web, database), diagram alur klien–API, tabel komponen, serta ringkasan akses (tanpa token vs dengan token). Mewakili bagian utama **Bab Perancangan / Sprint 0 (architecture sprint)**. Berguna untuk **developer baru** dan **tech lead** yang ingin paham sistem secara keseluruhan sebelum menyentuh kode.
+**Gambaran arsitektur** stack: komponen (portfolio-api, portfolio-admin, portfolio-web, database), diagram konteks dan lapisan, tabel komponen, serta ringkasan akses (tanpa token vs dengan token). Dilengkapi daftar isi dan referensi ke [DIAGRAM_DAN_ERD.md](DIAGRAM_DAN_ERD.md) untuk diagram lengkap. Berguna untuk **developer baru** dan **tech lead** yang ingin paham sistem secara keseluruhan sebelum menyentuh kode.
 
 ---
 
 ### [DIAGRAM_DAN_ERD.md](DIAGRAM_DAN_ERD.md)
 
-Diagram dan ERD: (1) arsitektur stack (klien–API–DB), (2) Entity Relationship Diagram database (users, experiences, educations, projects, blog_posts, skills, tags, pivot tables, dll.), (3) alur publikasi (publik vs admin), (4) alur admin login dan auto-fill, (5) alur deploy container. Semua dalam format Mermaid. Menguatkan **Bab Perancangan** dengan representasi visual. Berguna untuk **developer** dan **tech lead** yang perlu gambaran visual model data dan alur sistem.
+**Diagram lengkap** dalam format Mermaid: (1) Arsitektur sistem (konteks klien–API–DB, lapisan, deploy container), (2) **Entity Relationship Diagram (ERD)** database, (3) **Diagram urutan (sequence)** — login admin, form kontak, publish blog, GET blog publik, (4) **Flowchart** — alur publikasi, admin login/auto-fill, user flow pengunjung, admin CRUD, (5) **Diagram state** — status blog/project (draft/published), status pesan (unread/read), (6) **Diagram class** (ringkas) entitas domain. Berguna untuk **developer** dan **tech lead** yang perlu gambaran visual model data dan alur sistem.
+
+---
+
+### [RANCANGAN_WEB_UI_UX.md](RANCANGAN_WEB_UI_UX.md)
+
+Rancangan UI/UX **portfolio-web** (publik): konsep "Clean & Content-First Professional", style guide, wireframe (Navbar, Hero, Timeline, Skills, Projects, Blog, Kontak), rekomendasi teknis (Tailwind, Framer Motion, react-hook-form + Zod), struktur kode, checklist SRS. Berguna untuk **developer frontend** dan **designer** yang mengerjakan situs publik.
+
+---
+
+### [RANCANGAN_ADMIN_UI_UX.md](RANCANGAN_ADMIN_UI_UX.md)
+
+Rancangan UI/UX **panel admin**: konsep "Clean Data-Driven Dashboard", layout Sidebar + Header + Main, Dashboard, DataTable (TanStack Table, StatusBadge, kebab menu), Form CRUD (FormBadge, RelationalSelect, auto-slug), Messages Inbox, dark mode. Berguna untuk **developer** yang mengerjakan atau memelihara admin.
 
 ---
 
 ### [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md)
 
-Perancangan dan implementasi fitur Admin: login dan current user, auto-fill user_id saat buat konten, form relasi sebagai select (nama bukan ID), list tampilan relasi dengan nama, menu sidebar dropdown per kelompok (terbuka saat halaman aktif). Termasuk diagram alur dan referensi file. Mewakili desain detail untuk beberapa item Sprint Backlog. Berguna untuk **developer** yang mengerjakan atau memelihara admin.
+Perancangan dan implementasi fitur Admin: login dan current user, auto-fill user_id saat buat konten, form relasi sebagai select (nama bukan ID), list tampilan relasi dengan nama, menu sidebar dropdown per kelompok (terbuka saat halaman aktif). Termasuk diagram alur dan referensi file. Melengkapi [RANCANGAN_ADMIN_UI_UX.md](RANCANGAN_ADMIN_UI_UX.md). Berguna untuk **developer** yang mengerjakan atau memelihara admin.
 
 ---
 
@@ -74,11 +92,14 @@ Panduan dokumentasi RPL/SDLC: tahap Analisis Kebutuhan (BRD, SRS, User Story, Mo
 
 ## Mulai dari mana?
 
+- Ingin **perubahan terbaru proyek** → baca [CHANGELOG.md](CHANGELOG.md).
 - Ingin **gambaran kebutuhan & ruang lingkup sistem** → baca [SRS-PORTFOLIO.md](SRS-PORTFOLIO.md).
 - Ingin **ringkasan rencana dan backlog fitur** → baca [RINGKASAN_RANCANGAN.md](RINGKASAN_RANCANGAN.md).
 - Ingin **gambaran sistem secara teknis** → baca [ARSITEKTUR.md](ARSITEKTUR.md).
 - Ingin **diagram dan ERD** → baca [DIAGRAM_DAN_ERD.md](DIAGRAM_DAN_ERD.md).
-- Ingin **detail fitur admin** → baca [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md).
+- Ingin **UI/UX web publik** → baca [RANCANGAN_WEB_UI_UX.md](RANCANGAN_WEB_UI_UX.md).
+- Ingin **UI/UX panel admin** → baca [RANCANGAN_ADMIN_UI_UX.md](RANCANGAN_ADMIN_UI_UX.md).
+- Ingin **detail fitur admin (perilaku)** → baca [PERANCANGAN_ADMIN.md](PERANCANGAN_ADMIN.md).
 - Ingin **publik vs admin API** → baca [PUBLIKASI_WEB.md](PUBLIKASI_WEB.md).
 - Ingin **alur konten blog post end-to-end** → baca [ALUR_KONTEN_POST.md](ALUR_KONTEN_POST.md).
 - Ingin **audit keamanan** → baca [AUDIT_REPORT_ISO27001.md](AUDIT_REPORT_ISO27001.md).
