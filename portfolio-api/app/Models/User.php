@@ -24,7 +24,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'profile_image_url',
         'api_token',
         'username',
-        'password',
     ];
 
     protected $hidden = [

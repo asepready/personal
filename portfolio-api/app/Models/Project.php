@@ -23,6 +23,8 @@ class Project extends Model
         'end_date',
         'is_active',
         'is_featured',
+        'is_published',
+        'published_at',
     ];
 
     protected $casts = [
@@ -30,6 +32,8 @@ class Project extends Model
         'end_date' => 'date',
         'is_active' => 'boolean',
         'is_featured' => 'boolean',
+        'is_published' => 'boolean',
+        'published_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

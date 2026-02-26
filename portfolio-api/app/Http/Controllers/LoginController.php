@@ -34,8 +34,14 @@ class LoginController extends Controller
         $user->api_token = Str::random(60);
         $user->save();
 
+        $userPayload = [
+            'id' => $user->id,
+            'full_name' => $user->full_name,
+            'username' => $user->username,
+        ];
+
         return $this->successResponse(
-            ['token' => $user->api_token],
+            ['token' => $user->api_token, 'user' => $userPayload],
             'Login berhasil',
             200
         );

@@ -17,6 +17,9 @@ class ProjectController extends Controller
         if ($request->has('user_id')) {
             $query->where('user_id', $request->get('user_id'));
         }
+        if (! auth()->check()) {
+            $query->where('is_published', true);
+        }
         $items = $query->paginate($perPage);
         return $this->successResponse($items, 'Projects retrieved successfully');
     }
@@ -24,7 +27,10 @@ class ProjectController extends Controller
     public function show(int $id): JsonResponse
     {
         $item = Project::with(['user', 'skills'])->find($id);
-        if (!$item) {
+        if (! $item) {
+            return $this->errorResponse('Project not found', null, 404);
+        }
+        if (! auth()->check() && ! $item->is_published) {
             return $this->errorResponse('Project not found', null, 404);
         }
         return $this->successResponse($item, 'Project retrieved successfully');
@@ -44,6 +50,8 @@ class ProjectController extends Controller
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'is_active' => 'nullable|boolean',
             'is_featured' => 'nullable|boolean',
+            'is_published' => 'nullable|boolean',
+            'published_at' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {
@@ -77,6 +85,8 @@ class ProjectController extends Controller
             'end_date' => 'nullable|date',
             'is_active' => 'nullable|boolean',
             'is_featured' => 'nullable|boolean',
+            'is_published' => 'nullable|boolean',
+            'published_at' => 'nullable|date',
         ]);
 
         if ($validator->fails()) {

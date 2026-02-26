@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getToken, setToken } from '../auth'
+import { getToken, setToken, setCurrentUser } from '../auth'
 import { login as apiLogin } from '../api'
 
 export default function Login() {
@@ -27,8 +27,10 @@ export default function Login() {
     try {
       const res = await apiLogin(u, p)
       const token = res?.data?.token
+      const user = res?.data?.user
       if (token) {
         setToken(token)
+        if (user) setCurrentUser(user)
         navigate('/', { replace: true })
       } else {
         setError('Respons login tidak valid.')
