@@ -60,7 +60,7 @@ export default function Contact() {
     <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem', maxWidth: 560 }}>
       <h1 className="section-title">Kontak</h1>
       {success && (
-        <div style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.4)', color: '#86efac', padding: '1rem', borderRadius: 8, marginBottom: '1rem' }}>
+        <div className="contact-success-box" role="status">
           Pesan berhasil dikirim. Terima kasih!
         </div>
       )}
@@ -78,7 +78,7 @@ export default function Contact() {
             onChange={handleChange}
             style={styles.input}
           />
-          {formErrors.name && <span style={styles.err}>{formErrors.name[0]}</span>}
+          {formErrors.name && <span className="form-error" style={styles.err}>{formErrors.name[0]}</span>}
         </div>
         <div style={styles.field}>
           <label htmlFor="email">Email *</label>
@@ -91,7 +91,7 @@ export default function Contact() {
             onChange={handleChange}
             style={styles.input}
           />
-          {formErrors.email && <span style={styles.err}>{formErrors.email[0]}</span>}
+          {formErrors.email && <span className="form-error" style={styles.err}>{formErrors.email[0]}</span>}
         </div>
         <div style={styles.field}>
           <label htmlFor="subject">Subjek *</label>
@@ -104,7 +104,7 @@ export default function Contact() {
             onChange={handleChange}
             style={styles.input}
           />
-          {formErrors.subject && <span style={styles.err}>{formErrors.subject[0]}</span>}
+          {formErrors.subject && <span className="form-error" style={styles.err}>{formErrors.subject[0]}</span>}
         </div>
         <div style={styles.field}>
           <label htmlFor="message">Pesan *</label>
@@ -117,7 +117,7 @@ export default function Contact() {
             onChange={handleChange}
             style={{ ...styles.input, minHeight: 120 }}
           />
-          {formErrors.message && <span style={styles.err}>{formErrors.message[0]}</span>}
+          {formErrors.message && <span className="form-error" style={styles.err}>{formErrors.message[0]}</span>}
         </div>
         <button type="submit" className="btn btn-primary" disabled={submitLoading}>
           {submitLoading ? 'Mengirim...' : 'Kirim'}
@@ -139,5 +139,5 @@ const styles = {
     borderRadius: 8,
     color: 'var(--color-text)',
   },
-  err: { fontSize: '0.875rem', color: '#fca5a5', marginTop: '0.25rem', display: 'block' },
+  err: { marginTop: '0.25rem', display: 'block' },
 }

@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { getToken } from './auth'
 import AdminLayout from './components/AdminLayout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -18,19 +19,26 @@ const resources = [
   { path: 'post-tags', label: 'Post Tags', endpoint: 'post-tags' },
   { path: 'certifications', label: 'Certifications', endpoint: 'certifications' },
   { path: 'contact-messages', label: 'Contact Messages', endpoint: 'contact-messages' },
-];
+]
+
+function ProtectedRoute() {
+  if (!getToken()) return <Navigate to="/login" replace />
+  return <Outlet />
+}
 
 export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={<AdminLayout />}>
-        <Route index element={<Dashboard />} />
-        {resources.map((r) => (
-          <Route key={r.path} path={r.path} element={<ResourcePage config={r} />} />
-        ))}
-        <Route path="*" element={<Navigate to="/" replace />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          {resources.map((r) => (
+            <Route key={r.path} path={r.path} element={<ResourcePage config={r} />} />
+          ))}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
       </Route>
     </Routes>
-  );
+  )
 }

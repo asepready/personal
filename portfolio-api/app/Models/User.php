@@ -23,10 +23,12 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'location',
         'profile_image_url',
         'api_token',
+        'username',
     ];
 
     protected $hidden = [
         'api_token',
+        'password',
     ];
 
     public function experiences(): HasMany

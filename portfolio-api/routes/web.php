@@ -106,6 +106,11 @@ $router->group(['prefix' => 'api', 'middleware' => 'throttle:5'], function () us
     $router->post('contact', 'PublicContactController@store');
 });
 
+// POST /api/login (username + password, rate limit 10/min per IP)
+$router->group(['prefix' => 'api', 'middleware' => 'throttle:10,1'], function () use ($router) {
+    $router->post('login', 'LoginController@login');
+});
+
 /*
 |--------------------------------------------------------------------------
 | API Routes - Protected (auth required): mutating + contact-messages

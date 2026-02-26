@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { getTheme, setTheme } from '../theme'
 
 const nav = [
   { to: '/', label: 'Home' },
@@ -15,21 +16,23 @@ const nav = [
 
 export default function Header() {
   const [open, setOpen] = useState(false)
+  const [theme, setThemeState] = useState('dark')
   const location = useLocation()
+
+  useEffect(() => {
+    setThemeState(getTheme())
+  }, [])
+
+  const handleToggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    setThemeState(next)
+  }
 
   return (
     <header style={styles.header}>
       <div className="container" style={styles.inner}>
         <Link to="/" style={styles.logo}>Portfolio</Link>
-        <button
-          type="button"
-          className="header-menu-btn"
-          aria-label="Toggle menu"
-          style={styles.menuBtn}
-          onClick={() => setOpen((o) => !o)}
-        >
-          <span style={styles.menuIcon}>{open ? '✕' : '☰'}</span>
-        </button>
         <nav className={`header-nav ${open ? 'header-nav-open' : ''}`} style={{ ...styles.nav, ...(open ? styles.navOpen : {}) }}>
           {nav.map(({ to, label }) => (
             <Link
@@ -40,11 +43,31 @@ export default function Header() {
                 ...(location.pathname === to ? styles.navLinkActive : {}),
               }}
               onClick={() => setOpen(false)}
+              aria-current={location.pathname === to ? 'page' : undefined}
             >
               {label}
             </Link>
           ))}
+          <button
+            type="button"
+            className="header-theme-toggle"
+            aria-label={theme === 'dark' ? 'Gunakan tema terang' : 'Gunakan tema gelap'}
+            title={theme === 'dark' ? 'Tema terang' : 'Tema gelap'}
+            onClick={handleToggleTheme}
+            style={styles.themeBtn}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
         </nav>
+        <button
+          type="button"
+          className="header-menu-btn"
+          aria-label="Toggle menu"
+          style={styles.menuBtn}
+          onClick={() => setOpen((o) => !o)}
+        >
+          <span style={styles.menuIcon}>{open ? '✕' : '☰'}</span>
+        </button>
       </div>
     </header>
   )
@@ -81,7 +104,15 @@ const styles = {
   menuIcon: {},
   nav: {
     display: 'flex',
+    alignItems: 'center',
     gap: '1.5rem',
+  },
+  themeBtn: {
+    background: 'none',
+    border: 'none',
+    fontSize: '1.25rem',
+    padding: '0.25rem',
+    cursor: 'pointer',
   },
   navOpen: {
     display: 'flex',

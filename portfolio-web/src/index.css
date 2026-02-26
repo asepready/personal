@@ -1,4 +1,6 @@
-:root {
+/* Dark theme (default) */
+:root,
+[data-theme="dark"] {
   --color-bg: #0f0f12;
   --color-surface: #18181c;
   --color-border: #2a2a2e;
@@ -7,6 +9,56 @@
   --color-primary: #7c3aed;
   --color-primary-hover: #8b5cf6;
   --font-sans: 'DM Sans', system-ui, sans-serif;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --color-bg: #f4f4f5;
+  --color-surface: #ffffff;
+  --color-border: #e4e4e7;
+  --color-text: #18181b;
+  --color-text-muted: #71717a;
+  --color-primary: #6d28d9;
+  --color-primary-hover: #5b21b6;
+}
+
+[data-theme="light"] .error-box {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #b91c1c;
+}
+
+.contact-success-box {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #86efac;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+[data-theme="light"] .contact-success-box {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #166534;
+}
+
+.form-error {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+  color: #fca5a5;
+}
+[data-theme="light"] .form-error {
+  color: #b91c1c;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 * {
@@ -132,4 +184,39 @@ button {
   .header-nav.header-nav-open {
     display: flex;
   }
+}
+
+/* Markdown post content */
+.markdown-content {
+  line-height: 1.7;
+}
+.markdown-content p {
+  margin: 0 0 1rem;
+}
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  margin: 1.5rem 0 0.75rem;
+  color: var(--color-text);
+}
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+.markdown-content pre {
+  overflow-x: auto;
+  font-family: ui-monospace, monospace;
+}
+.markdown-content code {
+  font-family: ui-monospace, monospace;
+}
+.markdown-content a {
+  color: var(--color-primary);
+}
+.markdown-content a:hover {
+  color: var(--color-primary-hover);
 }

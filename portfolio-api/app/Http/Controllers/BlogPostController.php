@@ -17,7 +17,9 @@ class BlogPostController extends Controller
         if ($request->has('user_id')) {
             $query->where('user_id', $request->get('user_id'));
         }
-        if ($request->has('is_published')) {
+        if (! auth()->check()) {
+            $query->where('is_published', true);
+        } elseif ($request->has('is_published')) {
             $query->where('is_published', $request->boolean('is_published'));
         }
         $items = $query->paginate($perPage);
@@ -27,7 +29,10 @@ class BlogPostController extends Controller
     public function show(int $id): JsonResponse
     {
         $item = BlogPost::with(['user', 'tags'])->find($id);
-        if (!$item) {
+        if (! $item) {
+            return $this->errorResponse('Blog post not found', null, 404);
+        }
+        if (! auth()->check() && ! $item->is_published) {
             return $this->errorResponse('Blog post not found', null, 404);
         }
         return $this->successResponse($item, 'Blog post retrieved successfully');

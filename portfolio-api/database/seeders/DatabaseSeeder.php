@@ -17,13 +17,21 @@ use App\Models\User;
 use App\Models\UserSkill;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        if (User::where('email_public', 'netadmin@example.com')->exists()) {
+        $user = User::where('email_public', 'netadmin@example.com')->first();
+        if ($user) {
+            if (!$user->username) {
+                $user->update([
+                    'username' => 'admin',
+                    'password' => Hash::make('password'),
+                ]);
+            }
             return;
         }
 
@@ -34,6 +42,8 @@ class DatabaseSeeder extends Seeder
             'email_public' => 'netadmin@example.com',
             'location' => 'Jakarta, Indonesia',
             'profile_image_url' => 'https://api.dicebear.com/7.x/avataaars/svg?seed=netadmin',
+            'username' => 'admin',
+            'password' => Hash::make('password'),
         ]);
 
         Experience::create([
