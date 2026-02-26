@@ -1,0 +1,38 @@
+# API Portfolio (Rust/Axum) - Production image for Podman/Docker
+# Multi-stage: build then minimal runtime
+
+# ---- Build ----
+FROM rust:1-bookworm AS builder
+
+WORKDIR /app
+
+# Copy manifests and source
+COPY Cargo.toml Cargo.lock* ./
+COPY src ./src
+
+# Release build (no DB needed at build; queries are runtime)
+RUN cargo build --release
+
+# ---- Runtime ----
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    libssl3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /app/target/release/portfolio-api-rs /app/portfolio-api-rs
+
+# Non-root user
+RUN useradd -r -s /bin/false app
+USER app
+
+EXPOSE 8000
+
+ENV PORT=8000 \
+    RUST_LOG=info,portfolio_api_rs=info
+
+CMD ["./portfolio-api-rs"]

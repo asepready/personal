@@ -1,6 +1,6 @@
 # Deploy Portfolio Stack dengan Podman
 
-Stack: Lumen API (`portfolio-api`), MariaDB, frontend visitor (`portfolio-web`), frontend admin (`portfolio-admin`). Semua dijalankan sebagai container; orkestrasi via Podman (atau Docker) Compose.
+Stack: Lumen API (`portfolio-api`), **Rust API** (`portfolio-api-rs`), MariaDB, frontend visitor (`portfolio-web`), frontend admin (`portfolio-admin`). Semua dijalankan sebagai container; orkestrasi via Podman (atau Docker) Compose.
 
 ## Prasyarat
 
@@ -28,7 +28,8 @@ docker compose up -d --build
 ```
 
 - **db**: MariaDB di port 3306 (data persisten di bind mount `./data`)
-- **api**: Lumen di http://localhost:8000 (Swagger UI: http://localhost:8000/docs)
+- **api**: Lumen di http://localhost:8000 (Swagger: http://localhost:8000/docs)
+- **api-rs**: Rust/Axum API di http://localhost:8001 (Swagger: http://localhost:8001/docs)
 - **web**: Visitor di http://localhost:3000 (proxy `/api` ke backend)
 - **admin**: Admin di http://localhost:3001 (proxy `/api` ke backend)
 
@@ -74,6 +75,33 @@ podman run -d --name portfolio-api --pod portfolio-pod \
 podman exec portfolio-api php artisan migrate --force
 ```
 
+### Hanya API Rust + DB (tanpa Compose)
+
+```bash
+podman pod create --name portfolio-rs-pod -p 8001:8000 -p 3306:3306
+
+podman run -d --name portfolio-db --pod portfolio-rs-pod \
+  -e MYSQL_ROOT_PASSWORD=secret \
+  -e MYSQL_DATABASE=personal_portfolio \
+  -e MYSQL_USER=portfolio \
+  -e MYSQL_PASSWORD=portfolio_pass \
+  -v portfolio-db-data:/var/lib/mysql \
+  mariadb:10.11
+
+# Tunggu DB siap (~10s), lalu:
+cd portfolio-api-rs
+podman build -t portfolio-api-rs -f Containerfile .
+podman run -d --name portfolio-api-rs --pod portfolio-rs-pod \
+  -e DB_HOST=portfolio-db \
+  -e DB_DATABASE=personal_portfolio \
+  -e DB_USERNAME=portfolio \
+  -e DB_PASSWORD=portfolio_pass \
+  -e PORT=8000 \
+  portfolio-api-rs
+```
+
+Rust API tidak butuh migrasi terpisah (skema DB sama dengan Lumen; jalankan migrasi sekali pakai Lumen jika perlu).
+
 ### Build image frontend (opsional)
 
 ```bash
@@ -86,12 +114,16 @@ podman run -d --name portfolio-web -p 3000:80 --add-host=host.containers.interna
 
 ## 5. Akses
 
-| Service   | URL                        |
-|----------|----------------------------|
-| API      | http://localhost:8000      |
-| Swagger  | http://localhost:8000/docs |
+| Service   | URL                         |
+|----------|-----------------------------|
+| API (Lumen) | http://localhost:8000    |
+| API (Rust)  | http://localhost:8001    |
+| Swagger (Lumen) | http://localhost:8000/docs |
+| Swagger (Rust)  | http://localhost:8001/docs |
 | Visitor  | http://localhost:3000      |
 | Admin    | http://localhost:3001      |
+
+Untuk pakai **Rust API** sebagai backend production, arahkan frontend ke `http://localhost:8001` (atau set `VITE_API_URL` ke URL api-rs).
 
 ## 6. Stop dan hapus
 

@@ -89,6 +89,32 @@ cargo run
 
 ---
 
+## Deploy Production (Podman/Docker)
+
+Image production multi-stage ada di **Containerfile**. Dari root workspace (yang berisi `compose.yaml`):
+
+```bash
+podman-compose up -d --build
+# API Rust: http://localhost:8001 , Swagger: http://localhost:8001/docs
+```
+
+Hanya build dan jalankan container API Rust (tanpa compose):
+
+```bash
+cd portfolio-api-rs
+podman build -t portfolio-api-rs -f Containerfile .
+podman run -d -p 8001:8000 \
+  -e DB_HOST=host.containers.internal \
+  -e DB_DATABASE=personal_portfolio \
+  -e DB_USERNAME=portfolio \
+  -e DB_PASSWORD=xxx \
+  portfolio-api-rs
+```
+
+Lihat [DEPLOY.md](../DEPLOY.md) untuk stack lengkap (db, api, api-rs, web, admin).
+
+---
+
 ## Dokumentasi API (OpenAPI 3 / Swagger UI)
 
 OpenAPI 3 dan Swagger UI disediakan untuk menjelajah dan mencoba endpoint.

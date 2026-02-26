@@ -1,0 +1,20 @@
+# Build artifacts
+target/
+
+# Env and secrets (inject at runtime)
+.env
+.env.*
+!.env.example
+
+# Git and IDE
+.git
+.gitignore
+.dockerignore
+*.md
+docs/
+
+# Tests (not needed in image)
+tests/
+
+# Debug
+*.pdb
