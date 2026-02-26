@@ -133,3 +133,38 @@ button {
     display: flex;
   }
 }
+
+/* Markdown post content */
+.markdown-content {
+  line-height: 1.7;
+}
+.markdown-content p {
+  margin: 0 0 1rem;
+}
+.markdown-content p:last-child {
+  margin-bottom: 0;
+}
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3 {
+  margin: 1.5rem 0 0.75rem;
+  color: var(--color-text);
+}
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0 0 1rem;
+  padding-left: 1.5rem;
+}
+.markdown-content pre {
+  overflow-x: auto;
+  font-family: ui-monospace, monospace;
+}
+.markdown-content code {
+  font-family: ui-monospace, monospace;
+}
+.markdown-content a {
+  color: var(--color-primary);
+}
+.markdown-content a:hover {
+  color: var(--color-primary-hover);
+}

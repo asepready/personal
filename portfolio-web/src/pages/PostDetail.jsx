@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { getBlogPost } from '../api'
 import Loading from '../components/Loading'
 import ErrorState from '../components/ErrorState'
+import MarkdownContent from '../components/MarkdownContent'
 
 export default function PostDetail() {
   const { id } = useParams()
@@ -44,7 +45,7 @@ export default function PostDetail() {
         <h1 style={styles.title}>{post.title}</h1>
         <time style={styles.date}>{formatDate(post.published_at)}</time>
         {post.excerpt && <p style={styles.excerpt}>{post.excerpt}</p>}
-        <div style={styles.content}>{post.content || ''}</div>
+        <MarkdownContent content={post.content || ''} style={styles.content} />
         {tags.length > 0 && (
           <div style={styles.tags}>
             {tags.map((t) => (
@@ -62,7 +63,7 @@ const styles = {
   title: { margin: '0 0 0.5rem', fontSize: '1.75rem' },
   date: { display: 'block', fontSize: '0.9375rem', color: 'var(--color-text-muted)', marginBottom: '1rem' },
   excerpt: { fontSize: '1.125rem', color: 'var(--color-text-muted)', marginBottom: '1rem' },
-  content: { whiteSpace: 'pre-wrap', lineHeight: 1.7 },
+  content: { lineHeight: 1.7 },
   tags: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1.5rem' },
   tag: { fontSize: '0.875rem', background: 'var(--color-surface)', border: '1px solid var(--color-border)', padding: '0.25rem 0.75rem', borderRadius: 6 },
 }
