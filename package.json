@@ -1,0 +1,15 @@
+{
+  "name": "personal-portfolio",
+  "private": true,
+  "description": "Portfolio stack: API (Lumen), web visitor, admin",
+  "scripts": {
+    "install:all": "npm install && cd portfolio-admin && npm install && cd ../portfolio-web && npm install",
+    "build": "npm run build:admin && npm run build:web",
+    "build:admin": "cd portfolio-admin && npm run build",
+    "build:web": "cd portfolio-web && npm run build",
+    "dev:admin": "cd portfolio-admin && npm run dev",
+    "dev:web": "cd portfolio-web && npm run dev",
+    "preview:admin": "cd portfolio-admin && npm run preview",
+    "preview:web": "cd portfolio-web && npm run preview"
+  }
+}

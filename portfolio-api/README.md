@@ -116,7 +116,7 @@ Gunakan path yang sama dengan base URL Anda (production: `https://domainanda.com
 
 ### Endpoint API (prefix: `/api`)
 
-- **Publik (tanpa token):** `GET` untuk semua resource di bawah, plus **POST /api/contact** (form kontak: body `name`, `email`, `subject`, `message`; rate limit 5 request/menit per IP). `user_id` untuk contact di-set oleh server (env `CONTACT_OWNER_USER_ID` atau user pertama).
+- **Publik (tanpa token):** `GET` untuk semua resource di bawah, plus **POST /api/contact** (form kontak: body `name`, `email`, `subject`, `message`; rate limit 5 request/menit per IP). `user_id` untuk contact di-set oleh server (env `CONTACT_OWNER_USER_ID` atau user pertama). Untuk **GET blog-posts** dan **GET projects**, request tanpa token hanya mengembalikan data dengan `is_published=true`; detail di [docs/PUBLIKASI_WEB.md](../docs/PUBLIKASI_WEB.md).
 - **Admin (header `Authorization: Bearer <token>`):** `POST`, `PUT`, `PATCH`, `DELETE` untuk resource di bawah, serta semua akses ke **contact-messages** (GET list/show, POST, PUT, PATCH, DELETE).
 
 Resource: `users`, `experiences`, `educations`, `skill-categories`, `skills`, `user-skills`, `projects`, `project-skills`, `blog-posts`, `tags`, `post-tags`, `certifications`, `contact-messages`.  
