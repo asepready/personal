@@ -6,9 +6,9 @@ Stack portfolio pribadi: API (Lumen), situs pengunjung (React), dan panel admin 
 
 | Folder / file | Peran |
 |---------------|--------|
-| **portfolio-api** | Backend Lumen: REST API, auth, CRUD (users, blog posts, projects, skills, dll.). |
-| **portfolio-admin** | Frontend admin (React + Vite): login, dashboard, CRUD, menu dropdown, relasi tampil nama. |
-| **portfolio-web** | Frontend publik (React + Vite): halaman portfolio dan blog untuk pengunjung. |
+| **api** | Backend Lumen: REST API, auth, CRUD (users, blog posts, projects, skills, dll.). |
+| **dashboard** | Frontend admin (React + Vite): login, dashboard, CRUD, menu dropdown, relasi tampil nama. |
+| **web** | Frontend publik (React + Vite): halaman portfolio dan blog untuk pengunjung. |
 | **docs/** | Dokumen proyek (perancangan admin, audit, dll.). |
 | **compose.yaml** | Orkestrasi Podman/Docker: db, api, web, admin. |
 | **DEPLOY.md** | Panduan deploy dengan Podman/Docker. |
@@ -21,7 +21,7 @@ Stack portfolio pribadi: API (Lumen), situs pengunjung (React), dan panel admin 
 npm run install:all
 ```
 
-Memasang dependency untuk `portfolio-admin` dan `portfolio-web`. API memakai Composer: `cd portfolio-api && composer install`.
+Memasang dependency untuk `dashboard` dan `web`. API memakai Composer: `cd api && composer install`.
 
 ### Build frontend (production)
 
@@ -29,11 +29,11 @@ Memasang dependency untuk `portfolio-admin` dan `portfolio-web`. API memakai Com
 npm run build
 ```
 
-Build `portfolio-admin` dan `portfolio-web`. Atau per app: `npm run build:admin`, `npm run build:web`.
+Build `dashboard` dan `web`. Atau per app: `npm run build:admin`, `npm run build:web`.
 
 ### Development (hot reload)
 
-Jalankan API dan DB terlebih dahulu (lihat [portfolio-api/README.md](portfolio-api/README.md) atau Compose). Lalu, dari root:
+Jalankan API dan DB terlebih dahulu (lihat [api/README.md](api/README.md) atau Compose). Lalu, dari root:
 
 ```bash
 npm run dev:admin   # Admin di http://localhost:3001
@@ -66,8 +66,24 @@ Dokumentasi menyeluruh ada di folder **docs/**; indeks lengkap: [docs/README.md]
 - [docs/PANDUAN_DOKUMENTASI_RPL.md](docs/PANDUAN_DOKUMENTASI_RPL.md) — Panduan struktur dokumen RPL/SDLC, mapping ke artefak Scrum, dan peta dokumen proyek.
 - [DEPLOY.md](DEPLOY.md) — Deploy stack dengan Podman/Docker Compose.
 
-## Subproyek
+## Subproyek & struktur kode singkat
 
-- [portfolio-api/README.md](portfolio-api/README.md) — Setup dan jalankan API.
-- [portfolio-admin/README.md](portfolio-admin/README.md) — Setup admin.
-- [portfolio-web/README.md](portfolio-web/README.md) — Setup situs publik.
+- [api/README.md](api/README.md) — Setup dan jalankan API.
+- [dashboard/README.md](dashboard/README.md) — Setup admin.
+- [web/README.md](web/README.md) — Setup situs publik.
+
+**Struktur kode (high-level):**
+
+- **api**: Lumen 10 dengan struktur standar Laravel/Lumen:
+  - `app/Http/Controllers` untuk endpoint REST (publik dan admin).
+  - `app/Models` untuk model Eloquent (users, projects, blog_posts, dll.).
+  - `database/migrations` dan `database/seeders` untuk skema & data awal.
+  - `tests` untuk PHPUnit (feature test endpoint utama).
+- **dashboard**: React + Vite:
+  - `src/pages` untuk halaman (Dashboard, Messages, CRUD resource).
+  - `src/components` dan `src/components/ui` untuk layout, tabel, form, badge, dll.
+  - `src/api.js` dan `src/auth.js` untuk komunikasi ke API dan auth.
+- **web**: React + Vite:
+  - `src/pages` untuk halaman publik (Home, About, Projects, Blog, Contact, dll.).
+  - `src/components` dan `src/components/ui` untuk layout, header/footer, timeline, state loading/error.
+  - `src/api.js` untuk konsumsi endpoint publik (`GET` resource, contact form).

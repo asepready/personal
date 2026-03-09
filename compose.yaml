@@ -1,5 +1,6 @@
 # Podman / Docker Compose - Portfolio stack
 # Run: podman-compose up -d   or   docker compose up -d
+# API: Lumen (api) port 8000, Rust (api-rs) port 8001. Frontend bisa pakai salah satu.
 
 services:
   db:
@@ -23,11 +24,11 @@ services:
 
   api:
     build:
-      context: ./portfolio-api
+      context: ./api
       dockerfile: Containerfile
     container_name: portfolio-api
     env_file:
-      - ./portfolio-api/.env.podman
+      - ./api/.env.podman
     environment:
       DB_HOST: db
       DB_PORT: 3306
@@ -44,7 +45,7 @@ services:
 
   web:
     build:
-      context: ./portfolio-web
+      context: ./web
       dockerfile: Containerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-}
@@ -56,7 +57,7 @@ services:
 
   admin:
     build:
-      context: ./portfolio-admin
+      context: ./dashboard
       dockerfile: Containerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-}

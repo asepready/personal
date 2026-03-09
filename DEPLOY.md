@@ -1,6 +1,6 @@
 # Deploy Portfolio Stack dengan Podman
 
-Stack: Lumen API (`portfolio-api`), MariaDB, frontend visitor (`portfolio-web`), frontend admin (`portfolio-admin`). Semua dijalankan sebagai container; orkestrasi via Podman (atau Docker) Compose.
+Stack: Lumen API (`api`), MariaDB, frontend visitor (`web`), frontend admin (`dashboard`). Semua dijalankan sebagai container; orkestrasi via Podman (atau Docker) Compose.
 
 ## Prasyarat
 
@@ -10,7 +10,7 @@ Stack: Lumen API (`portfolio-api`), MariaDB, frontend visitor (`portfolio-web`),
 ## 1. Siapkan env
 
 ```bash
-cd portfolio-api
+cd api
 cp .env.example.podman .env.podman
 # Edit .env.podman: isi APP_KEY (generate dengan: php -r "echo 'base64:'.base64_encode(random_bytes(32));"), sesuaikan DB_* / MYSQL_ROOT_PASSWORD bila perlu.
 ```
@@ -28,7 +28,8 @@ docker compose up -d --build
 ```
 
 - **db**: MariaDB di port 3306 (data persisten di bind mount `./data`)
-- **api**: Lumen di http://localhost:8000 (Swagger UI: http://localhost:8000/docs)
+- **api**: Lumen di http://localhost:8000 (Swagger: http://localhost:8000/docs)
+- **api-rs**: Rust/Axum API di http://localhost:8001 (Swagger: http://localhost:8001/docs)
 - **web**: Visitor di http://localhost:3000 (proxy `/api` ke backend)
 - **admin**: Admin di http://localhost:3001 (proxy `/api` ke backend)
 
@@ -60,7 +61,7 @@ podman run -d --name portfolio-db --pod portfolio-pod \
   mariadb:10.11
 
 # Tunggu DB siap (mis. 10 detik), lalu build dan jalankan API
-cd portfolio-api
+cd api
 podman build -t portfolio-api -f Containerfile .
 podman run -d --name portfolio-api --pod portfolio-pod \
   -e DB_HOST=portfolio-db \
@@ -77,7 +78,7 @@ podman exec portfolio-api php artisan migrate --force
 ### Build image frontend (opsional)
 
 ```bash
-cd portfolio-web
+cd web
 podman build -t portfolio-web -f Containerfile .
 # Jalankan dengan proxy ke API (pastikan API bisa diakses dari host, atau gunakan compose)
 podman run -d --name portfolio-web -p 3000:80 --add-host=host.containers.internal:host-gateway portfolio-web
@@ -86,12 +87,12 @@ podman run -d --name portfolio-web -p 3000:80 --add-host=host.containers.interna
 
 ## 5. Akses
 
-| Service   | URL                        |
-|----------|----------------------------|
-| API      | http://localhost:8000      |
-| Swagger  | http://localhost:8000/docs |
-| Visitor  | http://localhost:3000      |
-| Admin    | http://localhost:3001      |
+| Service      | URL                         |
+|------------- |-----------------------------|
+| API (Lumen)  | http://localhost:8000       |
+| Swagger      | http://localhost:8000/docs  |
+| Visitor      | http://localhost:3000       |
+| Admin        | http://localhost:3001       |
 
 ## 6. Stop dan hapus
 
