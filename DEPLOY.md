@@ -1,6 +1,6 @@
 # Deploy Portfolio Stack dengan Podman
 
-Stack: Lumen API (`portfolio-api`), **Rust API** (`portfolio-api-rs`), MariaDB, frontend visitor (`portfolio-web`), frontend admin (`portfolio-admin`). Semua dijalankan sebagai container; orkestrasi via Podman (atau Docker) Compose.
+Stack: Lumen API (`api`), MariaDB, frontend visitor (`web`), frontend admin (`dashboard`). Semua dijalankan sebagai container; orkestrasi via Podman (atau Docker) Compose.
 
 ## Prasyarat
 
@@ -10,7 +10,7 @@ Stack: Lumen API (`portfolio-api`), **Rust API** (`portfolio-api-rs`), MariaDB, 
 ## 1. Siapkan env
 
 ```bash
-cd portfolio-api
+cd api
 cp .env.example.podman .env.podman
 # Edit .env.podman: isi APP_KEY (generate dengan: php -r "echo 'base64:'.base64_encode(random_bytes(32));"), sesuaikan DB_* / MYSQL_ROOT_PASSWORD bila perlu.
 ```
@@ -61,7 +61,7 @@ podman run -d --name portfolio-db --pod portfolio-pod \
   mariadb:10.11
 
 # Tunggu DB siap (mis. 10 detik), lalu build dan jalankan API
-cd portfolio-api
+cd api
 podman build -t portfolio-api -f Containerfile .
 podman run -d --name portfolio-api --pod portfolio-pod \
   -e DB_HOST=portfolio-db \
@@ -75,37 +75,10 @@ podman run -d --name portfolio-api --pod portfolio-pod \
 podman exec portfolio-api php artisan migrate --force
 ```
 
-### Hanya API Rust + DB (tanpa Compose)
-
-```bash
-podman pod create --name portfolio-rs-pod -p 8001:8000 -p 3306:3306
-
-podman run -d --name portfolio-db --pod portfolio-rs-pod \
-  -e MYSQL_ROOT_PASSWORD=secret \
-  -e MYSQL_DATABASE=personal_portfolio \
-  -e MYSQL_USER=portfolio \
-  -e MYSQL_PASSWORD=portfolio_pass \
-  -v portfolio-db-data:/var/lib/mysql \
-  mariadb:10.11
-
-# Tunggu DB siap (~10s), lalu:
-cd portfolio-api-rs
-podman build -t portfolio-api-rs -f Containerfile .
-podman run -d --name portfolio-api-rs --pod portfolio-rs-pod \
-  -e DB_HOST=portfolio-db \
-  -e DB_DATABASE=personal_portfolio \
-  -e DB_USERNAME=portfolio \
-  -e DB_PASSWORD=portfolio_pass \
-  -e PORT=8000 \
-  portfolio-api-rs
-```
-
-Rust API tidak butuh migrasi terpisah (skema DB sama dengan Lumen; jalankan migrasi sekali pakai Lumen jika perlu).
-
 ### Build image frontend (opsional)
 
 ```bash
-cd portfolio-web
+cd web
 podman build -t portfolio-web -f Containerfile .
 # Jalankan dengan proxy ke API (pastikan API bisa diakses dari host, atau gunakan compose)
 podman run -d --name portfolio-web -p 3000:80 --add-host=host.containers.internal:host-gateway portfolio-web
@@ -114,16 +87,12 @@ podman run -d --name portfolio-web -p 3000:80 --add-host=host.containers.interna
 
 ## 5. Akses
 
-| Service   | URL                         |
-|----------|-----------------------------|
-| API (Lumen) | http://localhost:8000    |
-| API (Rust)  | http://localhost:8001    |
-| Swagger (Lumen) | http://localhost:8000/docs |
-| Swagger (Rust)  | http://localhost:8001/docs |
-| Visitor  | http://localhost:3000      |
-| Admin    | http://localhost:3001      |
-
-Untuk pakai **Rust API** sebagai backend production, arahkan frontend ke `http://localhost:8001` (atau set `VITE_API_URL` ke URL api-rs).
+| Service      | URL                         |
+|------------- |-----------------------------|
+| API (Lumen)  | http://localhost:8000       |
+| Swagger      | http://localhost:8000/docs  |
+| Visitor      | http://localhost:3000       |
+| Admin        | http://localhost:3001       |
 
 ## 6. Stop dan hapus
 
